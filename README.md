@@ -2,6 +2,6 @@
 Welcome!
 
 ## Team Crater
-Helen Stockman
-James Wilson
-Dominic Phan
+* Helen Stockman
+* James Wilson
+* Dominic Phan
