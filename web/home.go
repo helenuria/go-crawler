@@ -1,5 +1,7 @@
-// home.go runs the homepage
-// and provides the user form.
+// home.go runs the homepage,
+// provides the user form,
+// and stores the response
+// in a JSON format.
 package main
 
 import (
@@ -9,4 +11,3 @@ import (
 func main() {
 	fmt.Printf("Home\n")
 }
-
