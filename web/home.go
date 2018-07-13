@@ -12,15 +12,11 @@ import (
 )
 
 type Crawl struct{
-	Url string
-	Keyword string
-	Type string
-	Crawl Type
-}
-
-type Type struct{
-	B bool
-	D bool
+	Url string			// Start
+	Keyword string	// Optional
+	Type string 		// "B" or "D"
+	BL string				// Breadth limit
+	DL string 			// Depth limit
 }
 
 type Graph struct{
@@ -39,6 +35,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		Url: r.FormValue("Url"),
 		Keyword: r.FormValue("Keyword"),
 		Type: r.FormValue("Type"),
+		Limit: r.FormValue("Limit"),
 	}
 	fmt.Println(crawl) // debug
 
