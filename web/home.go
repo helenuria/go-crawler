@@ -39,7 +39,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		BL: r.FormValue("BL"),
 		DL: r.FormValue("DL"),
 	}
-	fmt.Println(crawl) // debug
+	fmt.Printf("%+v\n", crawl) // debug
 
 	// TODO format crawl settings as needed
 	_ = crawl
