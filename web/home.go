@@ -13,9 +13,9 @@ import (
 
 type Crawl struct{
 	Url string			// Start
-	Keyword string	// Optional
+	Keyword string		// Optional
 	Type string 		// "B" or "D"
-	BL string				// Breadth limit
+	BL string			// Breadth limit
 	DL string 			// Depth limit
 }
 
