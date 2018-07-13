@@ -1,7 +1,8 @@
 // home.go runs the homepage,
 // provides the user form,
-// and stores the response
-// in a JSON format.
+// stores the response in a
+// a JSON format, crawls,
+// then graphs the crawl.
 package main
 
 import (
@@ -10,26 +11,50 @@ import (
 	"fmt"
 )
 
-type FormPage struct{
-	URL string
+type Crawl struct{
+	Url string
+	Keyword string
 	Type string
+	Crawl Type
 }
 
-func formHandler(w http.ResponseWriter, r *http.Request) {
-	p := FormPage{URL: "starting.url", Type: "Depth-first"} // Hardcoded values
-	t, _ := template.ParseFiles("basictemplating.html")
-	t.Execute(w, p)
-
+type Type struct{
+	B bool
+	D bool
 }
 
+type Graph struct{
+	//
+}
 
+func handler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("forms.html"))
 
-func indexhandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "<h1>Hey, %s</h1>", "<strong>there</strong>")
+	if r.Method != http.MethodPost {
+		tmpl.Execute(w, nil)
+		return
+	}
+
+	crawl := Crawl{
+		Url: r.FormValue("Url"),
+		Keyword: r.FormValue("Keyword"),
+		Type: r.FormValue("Type"),
+	}
+	fmt.Println(crawl) // debug
+
+	// TODO format crawl settings
+	_ = crawl
+
+	/* Crawler Program
+			input: crawl in JSON
+			output: graph in JSON */
+
+	/* Render graph  */
+
+	tmpl.Execute(w, struct{ Success bool }{true})
 }
 
 func main() {
-	http.HandleFunc("/", indexhandler)
-	http.HandleFunc("/form/", formHandler)
+	http.HandleFunc("/", handler)
 	http.ListenAndServe(":80", nil)
 }
