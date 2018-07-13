@@ -35,7 +35,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		Url: r.FormValue("Url"),
 		Keyword: r.FormValue("Keyword"),
 		Type: r.FormValue("Type"),
-		Limit: r.FormValue("Limit"),
+		BL: r.FormValue("BL"),
+		DL: r.FormValue("DL"),
 	}
 	fmt.Println(crawl) // debug
 

@@ -1,26 +1,53 @@
-<!-- TODO: add BF page limit, add DF depth limit, -->
+<!-- TODO: add optional/required constraints -->
 {{if .Success}}
+
   <h1>crawling...</h1>
+
 {{else}}
+
+  <style>
+  body {
+      background-color: linen;
+  }
+  .sub { display: none; }
+  :checked ~ .sub {
+      display: block;
+      margin-left: 40px;
+  }
+  </style>
+
 	<h1>Crawl</h1>
 	<form action = "/crawl/" method="POST">
-		<label>url:</label><br />
-		<input type="url" name="Url"><br />
-		<label>keyword:</label><br />
+		<label>Url:</label><br />
+		<input Type="url" name="Url"><br />
+		<label>Keyword:</label><br />
 		<input type="text" name="Keyword"><br />
     <fieldset>
         <legend>Type</legend>
-        <p>
+        <div>
           <input type="radio" name="Type" value="B">
           <label>Breadth-first</label>
-        </p>
-        <p>
+          <div class="sub">
+            <div>
+              <label>Limit:</label>
+              <input type="number" name="BL" min="1" max="5">
+            </div>
+          </div>
+        </div>
+        <div>
           <input type="radio" name="Type" value="D">
           <label>Depth-first</label>
-        </p>
+          <div class="sub">
+            <div>
+              <label>Limit:</label>
+              <input type="number" name="DL" min="1" max="5">
+            </div>
+          </div>
+        </div>
       </fieldset>
     <div class="button">
       <button type="submit">Submit</button>
     </div>
 	</form>
+
 {{end}}
