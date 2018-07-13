@@ -1,8 +1,9 @@
 // home.go runs the homepage,
 // provides the user form,
-// stores the response in a
-// a JSON format, crawls,
+// stores the response in
+// in some format, crawls,
 // then graphs the crawl.
+//TODO add cookies and past starting urls
 package main
 
 import (
@@ -13,10 +14,10 @@ import (
 
 type Crawl struct{
 	Url string			// Start
-	Keyword string		// Optional
-	Type string 		// "B" or "D"
-	BL string			// Breadth limit
-	DL string 			// Depth limit
+	Keyword string	// Optional
+	Type string			// "B" or "D"
+	BL string				// Breadth limit
+	DL string				// Depth limit
 }
 
 type Graph struct{
@@ -40,14 +41,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println(crawl) // debug
 
-	// TODO format crawl settings
+	// TODO format crawl settings as needed
 	_ = crawl
 
+	// TODO
 	/* Crawler Program
-			input: crawl in JSON
-			output: graph in JSON */
+			input: crawl (formatted)
+			output: graph (formatted) */
 
-	/* Render graph  */
+	// TODO
+	/* Render graph
+		input: graph (formatted)
+		output: D3.js, graphs.html? */
 
 	tmpl.Execute(w, struct{ Success bool }{true})
 }
