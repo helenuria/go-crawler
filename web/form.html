@@ -1,0 +1,46 @@
+<!-- TODO: add BF page limit, add DF depth limit, -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Go Crawler</title>
+  </head>
+  <body>
+    <h1>Crawl Settings</h1>
+    <form action="/handling-form-page" method="post">
+
+      <div>
+        <label for="startUrl">Starting URL:</label>
+        <input type="url" id="startUrl" name="startUrl"
+               placeholder="https://example.com"
+               pattern="https://.*" size="20" required />
+      </div>
+
+      <fieldset>
+        <legend>Optional</legend>
+        <div>
+          <label for="keyword">Stop at keyword:</label>
+          <input type="text" id="keyword" name="keyword">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Crawl Type</legend>
+        <p>
+          <input type="radio" name="searchType" id="type_1" value="BF">
+          <label for="type_1">Breadth-first</label>
+        </p>
+        <p>
+          <input type="radio" name="searchType" id="type_2" value="DF">
+          <label for="type_2">Depth-first</label>
+        </p>
+      </fieldset>
+
+      <div class="button">
+        <button type="submit">Submit</button>
+      </div>
+
+    </form>
+  </body>
+</html>
