@@ -9,7 +9,7 @@ Welcome!
 
 ## home.go 
 
-###home.go is a web server that:
+### home.go is a web server that:
 * listens on port 80
 * serves forms.html to the client/browser
 * collects the form input and stores it in the 'crawl' struct
