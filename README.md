@@ -13,7 +13,7 @@ Welcome!
 * run "web.exe"
 * navigate to localhost:80 in your browser.
 * Submit some data and watch the console output how the submitted form data is stored.
-* Interactive crawl graph at localhost/example/
+* Interactive demo graph displayed after posting form
 
 ### Mac build ###
 * navigate to the project's `/web` directory
@@ -21,11 +21,11 @@ Welcome!
 * run the command `./web -addr :8080`
 * navigate to `localhost:8080` in your browser.
 * Submit some data and watch the console output how the submitted form data is stored.
-* Interactive crawl graph at localhost/example/
+* Interactive demo graph displayed after posting form
 
 #### home.go ####
 * web server
-* listens on port 79
-* serves forms.html to the client/browser
+* listens on specified port
+* serves index.html to the browser
 * collects the form input and stores it in the 'crawl' struct
 * handles the crawler program and graph rendering
