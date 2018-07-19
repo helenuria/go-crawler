@@ -16,3 +16,9 @@ Welcome!
 * is structured to handle the crawler program and graph rendering
 
 To test, navigate to the project's "/web/" dir and run the command, "go build", in the console to build, "web.exe". Run "web.exe" and navigate to localhost:80 in your browser. Submit some data and watch the console output how the submitted form data is stored.
+
+## D3 example
+
+To visit my implementation of a graph, visit /example
+* Did a manual web crawl using a few links to populate the graph.
+* Nodes are clickable and will open a new tab to that url.
