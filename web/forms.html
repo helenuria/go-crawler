@@ -1,7 +1,151 @@
-<!-- TODO: add optional/required constraints, past starting urls, -->
+<!-- TODO: past starting urls, template crawl data for graphing, -->
 {{if .Success}}
 
-  <h1>crawling...</h1>
+  <head>
+      <meta charset="utf-8" />
+      <title>D3 Demo</title>
+      <script src="https://d3js.org/d3.v5.min.js"></script>
+  </head>
+  <body>
+      <h1>Crawling https://en.wikipedia.org/wiki/Dog</h1>
+      <svg width="960" height="600"></svg>
+      <script>
+
+      var nodes = [
+          { id: "dog", group: 0, label: "https://en.wikipedia.org/wiki/Dog"},
+          { id: "canidae", group: 0, label: "https://en.wikipedia.org/wiki/Canidae"},
+          { id: "doggie", group: 0, label: "https://en.wikipedia.org/wiki/Doggie_(artist)"},
+          { id: "graywolf", group: 0, label: "https://en.wikipedia.org/wiki/Gray_wolf"},
+          { id: "canis", group: 0, label: "https://en.wikipedia.org/wiki/Canis"},
+          { id: "canids", group: 1, label: "https://en.wikipedia.org/wiki/Evolution_of_the_wolf#Wolf-like_canids"},
+          { id: "extinction", group: 1, label: "https://en.wikipedia.org/wiki/Extinction"},
+          { id: "denmark", group: 2, label: "https://en.wikipedia.org/wiki/Denmark"},
+          { id: "copenhagen", group: 2, label: "https://en.wikipedia.org/wiki/Copenhagen"},
+          { id: "istanbul", group: 2, label: "https://en.wikipedia.org/wiki/Istanbul"},
+          { id: "genus", group: 3, label: "https://en.wikipedia.org/wiki/Genus" },
+          { id: "animal", group: 3, label: "https://en.wikipedia.org/wiki/Animal" },
+          { id: "chordate", group: 3, label: "https://en.wikipedia.org/wiki/Chordate" },
+          { id: "mammal", group: 3, label: "https://en.wikipedia.org/wiki/Mammal" },
+          { id: "carnivora", group: 3, label: "https://en.wikipedia.org/wiki/Carnivora" },
+          { id: "vertebrate", group: 4, label: "https://en.wikipedia.org/wiki/Vertebrate" },
+          { id: "clade", group: 4, label: "https://en.wikipedia.org/wiki/Clade" },
+          { id: "endotherm", group: 4, label: "https://en.wikipedia.org/wiki/Endotherm" },
+          { id: "amniotes", group: 4, label: "https://en.wikipedia.org/wiki/Amniote" },
+          { id: "reptile", group: 4, label: "https://en.wikipedia.org/wiki/Reptile" },
+      ]
+
+      var links = [
+          { target: "canidae", source: "dog" },
+          { target: "doggie", source: "dog" },
+          { target: "graywolf", source: "dog" },
+          { target: "canis", source: "dog" },
+          { target: "canids", source: "dog" },
+          { target: "extinction", source: "dog" },
+          { target: "copenhagen", source: "doggie" },
+          { target: "denmark", source: "doggie" },
+          { target: "istanbul", source: "doggie" },
+          { target: "genus", source: "canis" },
+          { target: "animal", source: "canis" },
+          { target: "chordate", source: "canis" },
+          { target: "mammal", source: "canis" },
+          { target: "carnivora", source: "canis" },
+          { target: "vertebrate", source: "mammal" },
+          { target: "clade", source: "mammal" },
+          { target: "endotherm", source: "mammal" },
+          { target: "amniotes", source: "mammal" },
+          { target: "reptile", source: "mammal" },
+      ]
+
+      var width = window.innerWidth
+      var height = window.innerHeight
+
+      var svg = d3.select('svg')
+      svg.attr('width', width).attr('height', height)
+
+      // simulation setup with all forces
+      var linkForce = d3
+          .forceLink()
+          .id((link) => { return link.id })
+          .strength((link) => .7)
+          .distance(d => 100)
+
+      var simulation = d3
+          .forceSimulation()
+          .force('link', linkForce)
+          .force('charge', d3.forceManyBody().strength(-800))
+          .force('center', d3.forceCenter(width / 2, height / 2))
+
+
+      var dragDrop = d3.drag().on('start', function (node) {
+          node.fx = node.x
+          node.fy = node.y
+      }).on('drag', function (node) {
+          simulation.alphaTarget(0.7).restart()
+          node.fx = d3.event.x
+          node.fy = d3.event.y
+      }).on('end', function (node) {
+          if (!d3.event.active) {
+              simulation.alphaTarget(0)
+          }
+          node.fx = null
+          node.fy = null
+      })
+
+      function openTab(selectedNode) {
+          window.open(
+              selectedNode.label,
+              '_blank'
+          );
+      }
+
+      var linkElements = svg.append("g")
+          .attr("class", "links")
+          .selectAll("line")
+          .data(links)
+          .enter().append("line")
+          .attr("stroke-width", 1)
+          .attr("stroke", "#339e6c")
+
+
+      var nodeElements = svg.append("g")
+          .attr("class", "nodes")
+          .selectAll("circle")
+          .data(nodes)
+          .enter().append("circle")
+              .attr('fill', '#4f339e')
+          .attr("r", 10)
+          .call(dragDrop)
+          .on('click', openTab)
+
+      var textElements = svg.append("g")
+          .attr("class", "texts")
+          .selectAll("text")
+          .data(nodes)
+          .enter().append("text")
+              .attr('fill', '#33659e')
+          .text(function (node) { return node.label })
+          .attr("font-size", 12)
+          .attr("font-family", "sans-serif")
+          .attr("dx", 15)
+          .attr("dy", 4)
+
+      simulation.nodes(nodes).on('tick', () => {
+          nodeElements
+              .attr('cx', function (node) { return node.x })
+              .attr('cy', function (node) { return node.y })
+          textElements
+              .attr('x', function (node) { return node.x })
+              .attr('y', function (node) { return node.y })
+          linkElements
+              .attr('x1', function (link) { return link.source.x })
+              .attr('y1', function (link) { return link.source.y })
+              .attr('x2', function (link) { return link.target.x })
+              .attr('y2', function (link) { return link.target.y })
+      })
+
+      simulation.force("link").links(links)
+      </script>
+  </body>
 
 {{else}}
 

@@ -3,7 +3,7 @@
 // stores the response in
 // in some format, crawls,
 // then graphs the crawl.
-//TODO add cookies and past starting urls
+//TODO add past starting urls using cookies/sessions
 package main
 
 import (
@@ -47,19 +47,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		BL:      r.FormValue("BL"),
 		DL:      r.FormValue("DL"),
 	}
-	// crawl is now populated.
+	// Crawl settings is now populated.
 	fmt.Printf("%+v\n", crawl) // debug
 
+	// Populate crawl graph.
 	_, _ = crawler.Crawl(crawl.Url)
 
-	// TODO
-	/* Render graph
-	input: graph (formatted)
-	output: D3.js, graphs.html? */
-
+	// Render graph.
 	tmpl.Execute(w, struct{ Success bool }{true})
 }
 
+/*
 func exampleHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("index.html"))
 	if r.Method != http.MethodGet {
@@ -68,6 +66,7 @@ func exampleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	tmpl.Execute(w, struct { Success bool }{ true })
 }
+*/
 
 func main() {
 	flag.Parse()
