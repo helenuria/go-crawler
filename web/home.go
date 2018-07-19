@@ -71,7 +71,7 @@ func exampleHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 	http.HandleFunc("/", handler)
-  http.HandleFunc("/example", exampleHandler)
+  //http.HandleFunc("/example", exampleHandler)
 	http.ListenAndServe(":80", nil)
 
 	if err := http.ListenAndServe(*addr, nil); err != nil {
