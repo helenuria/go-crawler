@@ -17,7 +17,7 @@ Welcome!
 
 Windows build
 * navigate to the project's "/web/" dir
-- run the command "go get golang.org/x/net/html"
+* run the command "go get golang.org/x/net/html"
 * run the command "go build"
 * run "web.exe"
 * navigate to localhost:80 in your browser.
