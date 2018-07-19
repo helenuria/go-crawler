@@ -58,7 +58,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, struct{ Success bool }{true})
 }
 
+func exampleHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("index.html"))
+	if r.Method != http.MethodGet {
+		tmpl.Execute(w, nil)
+		return
+	}
+	tmpl.Execute(w, struct { Success bool }{ true })
+}
+
 func main() {
 	http.HandleFunc("/", handler)
-	http.ListenAndServe(":80", nil)
+	http.HandleFunc("/example", exampleHandler)
+	http.ListenAndServe(":3000", nil)
 }
