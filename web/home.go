@@ -70,5 +70,5 @@ func exampleHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/example", exampleHandler)
-	http.ListenAndServe(":3000", nil)
+	http.ListenAndServe(":80", nil)
 }
