@@ -7,20 +7,28 @@
 package main
 
 import (
-	"html/template"
-	"net/http"
+	"flag"
 	"fmt"
+	"html/template"
+	"log"
+	"net/http"
+
+	"github.com/helenuria/go-crawler"
 )
 
-type Crawl struct{
-	Url string			// Start
-	Keyword string	// Optional
-	Type string			// "B" or "D"
-	BL string				// Breadth limit
-	DL string				// Depth limit
+var (
+	addr = flag.String("addr", ":80", "address for the server to listen on")
+)
+
+type Crawl struct {
+	Url     string // Start
+	Keyword string // Optional
+	Type    string // "B" or "D"
+	BL      string // Breadth limit
+	DL      string // Depth limit
 }
 
-type Graph struct{
+type Graph struct {
 	//
 }
 
@@ -33,32 +41,29 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	crawl := Crawl{
-		Url: r.FormValue("Url"),
+		Url:     r.FormValue("Url"),
 		Keyword: r.FormValue("Keyword"),
-		Type: r.FormValue("Type"),
-		BL: r.FormValue("BL"),
-		DL: r.FormValue("DL"),
+		Type:    r.FormValue("Type"),
+		BL:      r.FormValue("BL"),
+		DL:      r.FormValue("DL"),
 	}
 	// crawl is now populated.
 	fmt.Printf("%+v\n", crawl) // debug
 
-	// TODO format crawl settings as needed
-	_ = crawl
-
-	// TODO
-	/* Crawler Program
-			input: crawl (formatted)
-			output: graph (formatted) */
+	_, _ = crawler.Crawl(crawl.Url)
 
 	// TODO
 	/* Render graph
-		input: graph (formatted)
-		output: D3.js, graphs.html? */
+	input: graph (formatted)
+	output: D3.js, graphs.html? */
 
 	tmpl.Execute(w, struct{ Success bool }{true})
 }
 
 func main() {
+	flag.Parse()
 	http.HandleFunc("/", handler)
-	http.ListenAndServe(":80", nil)
+	if err := http.ListenAndServe(*addr, nil); err != nil {
+		log.Fatal(err)
+	}
 }

@@ -4,17 +4,15 @@
 
 // TODO: build keywordHighlight feature
 // TODO: This will have to take starting url from web form
-package main
+package crawler
 
 import (
-	"flag"                  // parse command line arguments
 	"fmt"                   // output
 	"golang.org/x/net/html" // parse html
 	"log"                   // error logging
 	"math/rand"             // for getting random numbers
 	"net/http"              // really useful http package in stdlib
 	"net/url"
-	"os"   // access to system calls
 	"time" // for seeding the random number
 )
 
@@ -37,24 +35,13 @@ type Page struct {
 
 const DEPTH = 30
 
-func main() {
+func Crawl(startingUrl string) (*Graph, error) {
 	// seed the random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	// take input from the command line and store it in variable args
-	// input comes from calling the program "go run crawler.go <starting url>"
-	flag.Parse()
-	args := flag.Args()
-
-	// validate usage
-	if len(args) < 1 {
-		fmt.Println("Usage: go run crawler.go <starting_url>")
-		os.Exit(1)
-	}
-
 	// this implements a depth first search for a hard coded depth
 	pages := make(map[string]Page)
-	stack := []string{args[0]}
+	stack := []string{startingUrl}
 
 	visitCount := 0
 	for len(stack) > 0 {
@@ -109,7 +96,7 @@ func main() {
 		graph.numVertices += 1
 
 	}
-	fmt.Printf("%#v\n", graph)
+	return graph, nil
 }
 
 // retrieveBody gets the html body at a url and return a slice of links in that body
@@ -140,7 +127,7 @@ func retrieveBody(pageUrl string) ([]string, error) {
 	// parse html body for urls
 	doc, err := html.Parse(body)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	var f func(*html.Node)
 	f = func(n *html.Node) {
