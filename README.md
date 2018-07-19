@@ -15,4 +15,16 @@ Welcome!
 * collects the form input and stores it in the 'crawl' struct
 * is structured to handle the crawler program and graph rendering
 
-To test, navigate to the project's "/web/" dir and run the command, "go build", in the console to build, "web.exe". Run "web.exe" and navigate to localhost:80 in your browser. Submit some data and watch the console output how the submitted form data is stored.
+To test (in windows)
+* navigate to the project's "/web/" dir 
+* run the command "go build"
+* run "web.exe"
+* navigate to localhost:80 in your browser. 
+* Submit some data and watch the console output how the submitted form data is stored.
+
+To test (on mac)
+* navigate to the project's `/web` directory
+* run the command `go build`
+* run the command `./web -addr :8080`
+* navigate to `localhost:8080` in your browser. 
+* Submit some data and watch the console output how the submitted form data is stored.
