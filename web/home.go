@@ -33,7 +33,7 @@ type Graph struct {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("forms.html"))
+	tmpl := template.Must(template.ParseFiles("index.html"))
 
 	if r.Method != http.MethodPost {
 		tmpl.Execute(w, nil)
@@ -57,21 +57,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, struct{ Success bool }{true})
 }
 
-/*
-func exampleHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("index.html"))
-	if r.Method != http.MethodGet {
-		tmpl.Execute(w, nil)
-		return
-	}
-	tmpl.Execute(w, struct { Success bool }{ true })
-}
-*/
-
 func main() {
 	flag.Parse()
 	http.HandleFunc("/", handler)
-  //http.HandleFunc("/example", exampleHandler)
 	http.ListenAndServe(":80", nil)
 
 	if err := http.ListenAndServe(*addr, nil); err != nil {
