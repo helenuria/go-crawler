@@ -3,29 +3,37 @@
 // stores the response in
 // in some format, crawls,
 // then graphs the crawl.
-//TODO add cookies and past starting urls
+//TODO add past starting urls using cookies/sessions
 package main
 
 import (
-	"html/template"
-	"net/http"
+	"flag"
 	"fmt"
+	"html/template"
+	"log"
+	"net/http"
+
+	"github.com/helenuria/go-crawler"
 )
 
-type Crawl struct{
-	Url string			// Start
-	Keyword string	// Optional
-	Type string			// "B" or "D"
-	BL string				// Breadth limit
-	DL string				// Depth limit
+var (
+	addr = flag.String("addr", ":80", "address for the server to listen on")
+)
+
+type Crawl struct {
+	Url     string // Start
+	Keyword string // Optional
+	Type    string // "B" or "D"
+	BL      string // Breadth limit
+	DL      string // Depth limit
 }
 
-type Graph struct{
+type Graph struct {
 	//
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("forms.html"))
+	tmpl := template.Must(template.ParseFiles("index.html"))
 
 	if r.Method != http.MethodPost {
 		tmpl.Execute(w, nil)
@@ -33,42 +41,29 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	crawl := Crawl{
-		Url: r.FormValue("Url"),
+		Url:     r.FormValue("Url"),
 		Keyword: r.FormValue("Keyword"),
-		Type: r.FormValue("Type"),
-		BL: r.FormValue("BL"),
-		DL: r.FormValue("DL"),
+		Type:    r.FormValue("Type"),
+		BL:      r.FormValue("BL"),
+		DL:      r.FormValue("DL"),
 	}
-	// crawl is now populated.
+	// Crawl settings is now populated.
 	fmt.Printf("%+v\n", crawl) // debug
 
-	// TODO format crawl settings as needed
-	_ = crawl
+	// Populate crawl graph.
+	_, _ = crawler.Crawl(crawl.Url)
 
-	// TODO
-	/* Crawler Program
-			input: crawl (formatted)
-			output: graph (formatted) */
-
-	// TODO
-	/* Render graph
-		input: graph (formatted)
-		output: D3.js, graphs.html? */
-
+	// Render graph.
 	tmpl.Execute(w, struct{ Success bool }{true})
 }
 
-func exampleHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("index.html"))
-	if r.Method != http.MethodGet {
-		tmpl.Execute(w, nil)
-		return
-	}
-	tmpl.Execute(w, struct { Success bool }{ true })
-}
-
 func main() {
+	flag.Parse()
 	http.HandleFunc("/", handler)
-	http.HandleFunc("/example", exampleHandler)
 	http.ListenAndServe(":80", nil)
+
+	if err := http.ListenAndServe(*addr, nil); err != nil {
+		log.Fatal(err)
+	}
+
 }

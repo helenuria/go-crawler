@@ -1,24 +1,31 @@
-# Graphical Web Crawler
+# Graphical Web Crawler #
 Welcome!
 
-## Team Crater
+## Team Crater ##
 * Helen Stockman
 * James Wilson
 * Dominic Phan
 
+### Windows build ###
+* navigate to the project's "/web/" dir
+* run the command "go get golang.org/x/net/html"
+* run the command "go build"
+* run "web.exe"
+* navigate to localhost:80 in your browser.
+* Submit some data and watch the console output how the submitted form data is stored.
+* Interactive demo graph displayed after posting form
 
-## home.go 
+### Mac build ###
+* navigate to the project's `/web` directory
+* run the command `go build`
+* run the command `./web -addr :8080`
+* navigate to `localhost:8080` in your browser.
+* Submit some data and watch the console output how the submitted form data is stored.
+* Interactive demo graph displayed after posting form
 
-### home.go is a web server that:
-* listens on port 80
-* serves forms.html to the client/browser
+#### home.go ####
+* web server
+* listens on specified port
+* serves index.html to the browser
 * collects the form input and stores it in the 'crawl' struct
-* is structured to handle the crawler program and graph rendering
-
-To test, navigate to the project's "/web/" dir and run the command, "go build", in the console to build, "web.exe". Run "web.exe" and navigate to localhost:80 in your browser. Submit some data and watch the console output how the submitted form data is stored.
-
-## D3 example
-
-To visit my implementation of a graph, visit /example
-* Did a manual web crawl using a few links to populate the graph.
-* Nodes are clickable and will open a new tab to that url.
+* handles the crawler program and graph rendering

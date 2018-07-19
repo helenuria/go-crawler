@@ -1,27 +1,30 @@
+<!-- TODO: past starting urls, template crawl data for graphing, -->
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8" />
-    <title>D3 Demo</title>
-    <script src="https://d3js.org/d3.v5.min.js"></script>
-</head>
-<body>
-    <h1>Crawling https://en.wikipedia.org/wiki/Dog</h1>
-    <svg width="960" height="600"></svg>
-    <script>
-        //TODO: JSON parser
+{{if .Success}}
+
+  <head>
+      <meta charset="utf-8" />
+      <title>D3 Demo</title>
+      <script src="https://d3js.org/d3.v5.min.js"></script>
+  </head>
+  <body>
+      <h1>Crawling https://en.wikipedia.org/wiki/Dog</h1>
+      <svg width="960" height="600"></svg>
+      <script>
+    //TODO: JSON parser
         // vertices to the graph
         var nodes = [
-            { id: "dog", group: 0, label: "https://en.wikipedia.org/wiki/Dog"},
-            { id: "canidae", group: 0, label: "https://en.wikipedia.org/wiki/Canidae"},
-            { id: "doggie", group: 0, label: "https://en.wikipedia.org/wiki/Doggie_(artist)"},
-            { id: "graywolf", group: 0, label: "https://en.wikipedia.org/wiki/Gray_wolf"},
-            { id: "canis", group: 0, label: "https://en.wikipedia.org/wiki/Canis"},
-            { id: "canids", group: 1, label: "https://en.wikipedia.org/wiki/Evolution_of_the_wolf#Wolf-like_canids"},
-            { id: "extinction", group: 1, label: "https://en.wikipedia.org/wiki/Extinction"},
-            { id: "denmark", group: 2, label: "https://en.wikipedia.org/wiki/Denmark"},
-            { id: "copenhagen", group: 2, label: "https://en.wikipedia.org/wiki/Copenhagen"},
-            { id: "istanbul", group: 2, label: "https://en.wikipedia.org/wiki/Istanbul"},
+            { id: "dog", group: 0, label: "https://en.wikipedia.org/wiki/Dog" },
+            { id: "canidae", group: 0, label: "https://en.wikipedia.org/wiki/Canidae" },
+            { id: "doggie", group: 0, label: "https://en.wikipedia.org/wiki/Doggie_(artist)" },
+            { id: "graywolf", group: 0, label: "https://en.wikipedia.org/wiki/Gray_wolf" },
+            { id: "canis", group: 0, label: "https://en.wikipedia.org/wiki/Canis" },
+            { id: "canids", group: 1, label: "https://en.wikipedia.org/wiki/Evolution_of_the_wolf#Wolf-like_canids" },
+            { id: "extinction", group: 1, label: "https://en.wikipedia.org/wiki/Extinction" },
+            { id: "denmark", group: 2, label: "https://en.wikipedia.org/wiki/Denmark" },
+            { id: "copenhagen", group: 2, label: "https://en.wikipedia.org/wiki/Copenhagen" },
+            { id: "istanbul", group: 2, label: "https://en.wikipedia.org/wiki/Istanbul" },
             { id: "genus", group: 3, label: "https://en.wikipedia.org/wiki/Genus" },
             { id: "animal", group: 3, label: "https://en.wikipedia.org/wiki/Animal" },
             { id: "chordate", group: 3, label: "https://en.wikipedia.org/wiki/Chordate" },
@@ -118,7 +121,7 @@
             .selectAll("circle")
             .data(nodes)
             .enter().append("circle")
-                .attr('fill', '#4f339e')
+            .attr('fill', '#4f339e')
             .attr("r", 10)
             .call(dragDrop)
             .on('click', openTab) // open tab by clicking on vertices
@@ -129,7 +132,7 @@
             .selectAll("text")
             .data(nodes)
             .enter().append("text")
-                .attr('fill', '#33659e')
+            .attr('fill', '#33659e')
             .text(function (node) { return node.label })
             .attr("font-size", 12)
             .attr("font-family", "sans-serif")
@@ -151,6 +154,57 @@
         })
 
         simulation.force("link").links(links)
-    </script>
-</body>
+      </script>
+  </body>
+
+{{else}}
+
+  <style>
+  body {
+      background-color: linen;
+  }
+  .sub { display: none; }
+  :checked ~ .sub {
+      display: block;
+      margin-left: 40px;
+  }
+  </style>
+
+	<h1>Crawl</h1>
+	<form action = "/crawl/" method="POST">
+		<label>Url:</label><br />
+		<input Type="url" name="Url"><br />
+		<label>Keyword:</label><br />
+		<input type="text" name="Keyword"><br />
+    <fieldset>
+        <legend>Type</legend>
+        <div>
+          <input type="radio" name="Type" value="B">
+          <label>Breadth-first</label>
+          <div class="sub">
+            <div>
+              <label>Limit:</label>
+              <input type="number" name="BL" min="1" max="5">
+            </div>
+          </div>
+        </div>
+        <div>
+          <input type="radio" name="Type" value="D">
+          <label>Depth-first</label>
+          <div class="sub">
+            <div>
+              <label>Limit:</label>
+              <input type="number" name="DL" min="1" max="5">
+            </div>
+          </div>
+        </div>
+      </fieldset>
+    <div class="button">
+      <button type="submit">Submit</button>
+    </div>
+	</form>
+
+{{end}}
+
 </html>
+
