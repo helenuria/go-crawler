@@ -51,7 +51,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%+v\n", crawl) // debug
 
 	// Populate crawl graph.
-	_, _ = crawler.Crawl(crawl.Url)
+	// Dom: Crawl() returns Nodes, Edges, Errors
+	// ...replace the _ with whatever variables you want to pass to parser
+	_, _, _ = crawler.Crawl(crawl.Url)
 
 	// Render graph.
 	tmpl.Execute(w, struct{ Success bool }{true})
