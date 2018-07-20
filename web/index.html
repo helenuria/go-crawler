@@ -12,53 +12,11 @@
       <h1>Crawling https://en.wikipedia.org/wiki/Dog</h1>
       <svg width="960" height="600"></svg>
       <script>
-    //TODO: JSON parser
+        // templated based on the string in the Graph struct
+        var json = JSON.parse({{.Graph}})
+        // destructure JSON to variables
+        var { nodes, links } = json;
         // vertices to the graph
-        var nodes = [
-            { id: "dog", group: 0, label: "https://en.wikipedia.org/wiki/Dog" },
-            { id: "canidae", group: 0, label: "https://en.wikipedia.org/wiki/Canidae" },
-            { id: "doggie", group: 0, label: "https://en.wikipedia.org/wiki/Doggie_(artist)" },
-            { id: "graywolf", group: 0, label: "https://en.wikipedia.org/wiki/Gray_wolf" },
-            { id: "canis", group: 0, label: "https://en.wikipedia.org/wiki/Canis" },
-            { id: "canids", group: 1, label: "https://en.wikipedia.org/wiki/Evolution_of_the_wolf#Wolf-like_canids" },
-            { id: "extinction", group: 1, label: "https://en.wikipedia.org/wiki/Extinction" },
-            { id: "denmark", group: 2, label: "https://en.wikipedia.org/wiki/Denmark" },
-            { id: "copenhagen", group: 2, label: "https://en.wikipedia.org/wiki/Copenhagen" },
-            { id: "istanbul", group: 2, label: "https://en.wikipedia.org/wiki/Istanbul" },
-            { id: "genus", group: 3, label: "https://en.wikipedia.org/wiki/Genus" },
-            { id: "animal", group: 3, label: "https://en.wikipedia.org/wiki/Animal" },
-            { id: "chordate", group: 3, label: "https://en.wikipedia.org/wiki/Chordate" },
-            { id: "mammal", group: 3, label: "https://en.wikipedia.org/wiki/Mammal" },
-            { id: "carnivora", group: 3, label: "https://en.wikipedia.org/wiki/Carnivora" },
-            { id: "vertebrate", group: 4, label: "https://en.wikipedia.org/wiki/Vertebrate" },
-            { id: "clade", group: 4, label: "https://en.wikipedia.org/wiki/Clade" },
-            { id: "endotherm", group: 4, label: "https://en.wikipedia.org/wiki/Endotherm" },
-            { id: "amniotes", group: 4, label: "https://en.wikipedia.org/wiki/Amniote" },
-            { id: "reptile", group: 4, label: "https://en.wikipedia.org/wiki/Reptile" },
-        ]
-
-        // edges in the graph
-        var links = [
-            { target: "canidae", source: "dog" },
-            { target: "doggie", source: "dog" },
-            { target: "graywolf", source: "dog" },
-            { target: "canis", source: "dog" },
-            { target: "canids", source: "dog" },
-            { target: "extinction", source: "dog" },
-            { target: "copenhagen", source: "doggie" },
-            { target: "denmark", source: "doggie" },
-            { target: "istanbul", source: "doggie" },
-            { target: "genus", source: "canis" },
-            { target: "animal", source: "canis" },
-            { target: "chordate", source: "canis" },
-            { target: "mammal", source: "canis" },
-            { target: "carnivora", source: "canis" },
-            { target: "vertebrate", source: "mammal" },
-            { target: "clade", source: "mammal" },
-            { target: "endotherm", source: "mammal" },
-            { target: "amniotes", source: "mammal" },
-            { target: "reptile", source: "mammal" },
-        ]
 
         // get height and width from user
         var width = window.innerWidth
