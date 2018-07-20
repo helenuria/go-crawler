@@ -1,12 +1,8 @@
-// portions of this code are copied from:
-// https://jdanger.com/build-a-web-crawler-in-go.html
-// https://schier.co/blog/2015/04/26/a-simple-web-scraper-in-go.html
-
 // TODO: build keywordHighlight feature
-// TODO: This will have to take starting url from web form
 package crawler
 
 import (
+	"encoding/json"
 	"fmt"                   // output
 	"golang.org/x/net/html" // parse html
 	"log"                   // error logging
@@ -19,13 +15,11 @@ import (
 type Vertex struct {
 	url              string
 	keywordHighlight bool
-	adjacentTo       []int
 }
 
-type Graph struct {
-	associatedKeywords []string
-	numVertices        int
-	Vertices           []*Vertex
+type Edge struct {
+	target string
+	source string
 }
 
 type Page struct {
@@ -35,13 +29,15 @@ type Page struct {
 
 const DEPTH = 30
 
-func Crawl(startingUrl string) (*Graph, error) {
+func Crawl(startingUrl string) ([]byte, []byte, error) {
 	// seed the random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
 
 	// this implements a depth first search for a hard coded depth
 	pages := make(map[string]Page)
 	stack := []string{startingUrl}
+	var Vertices []Vertex
+	var Edges []Edge
 
 	visitCount := 0
 	for len(stack) > 0 {
@@ -49,24 +45,35 @@ func Crawl(startingUrl string) (*Graph, error) {
 			break
 		}
 
+		// pop the stack
 		top := stack[len(stack)-1]
-		stack = stack[:len(stack)-1] // remove top of stack
+		stack = stack[:len(stack)-1]
 
+		// if the link has already been visited, do not add to graph
+		// this prevents loops
 		if pages[top].visited {
 			continue
 		}
 
+		// Get the links from the top link...
 		links, err := retrieveBody(top)
 		if err != nil {
 			log.Printf("couldnt retrieve body: %v", err)
 			continue
 		}
 
+		// ...and randomize the order (because we'll have to pop them in order)
 		rand.Shuffle(len(links), func(i, j int) {
 			links[i], links[j] = links[j], links[i]
 		})
+
+		// ...then mark the current link as visited.
 		pages[top] = Page{links: links, visited: true}
 		visitCount++
+
+		// push the new links to the stack
+		// this way, the next link we pop will be a child of the current link
+		// unless there are no children, in which case we'll get a sibling link
 		for _, link := range links {
 			if pages[link].visited {
 				continue
@@ -75,12 +82,7 @@ func Crawl(startingUrl string) (*Graph, error) {
 			stack = append(stack, link)
 		}
 	}
-	urlIndex := make(map[string]int)
-	for pageUrl, _ := range pages {
-		urlIndex[pageUrl] = len(urlIndex)
-	}
 
-	graph := new(Graph)
 	for pageUrl, page := range pages {
 		// create vertex and add to graph
 		v := new(Vertex)
@@ -88,15 +90,23 @@ func Crawl(startingUrl string) (*Graph, error) {
 		v.keywordHighlight = false
 
 		for _, link := range page.links {
-			v.adjacentTo = append(v.adjacentTo, urlIndex[link])
+			e := new(Edge)
+			e.target = link
+			e.source = pageUrl
+			Edges = append(Edges, *e)
 		}
 
-		// update the graph
-		graph.Vertices = append(graph.Vertices, v)
-		graph.numVertices += 1
-
+		Vertices = append(Vertices, *v)
 	}
-	return graph, nil
+
+	vJson, err := json.Marshal(Vertices)
+	eJson, err2 := json.Marshal(Edges)
+	if err != nil && err2 != nil {
+		log.Printf("couldnt parsse json: %v, %v", err, err2)
+		return nil, nil, err
+	}
+	// fmt.Println("Vertices: ", vJson, "\nEdges: ", eJson)
+	return vJson, eJson, nil
 }
 
 // retrieveBody gets the html body at a url and return a slice of links in that body
@@ -150,34 +160,4 @@ func retrieveBody(pageUrl string) ([]string, error) {
 	f(doc)
 
 	return foundUrl, err
-
-	/*
-		// iterate over tokens to find <a> tags
-		z := html.NewTokenizer(body)
-		for {
-			tt := z.Next()
-			switch {
-			case tt == html.ErrorToken:
-				// end of html body
-			case tt == html.StartTagToken:
-				t := z.Token()
-				isAnchor := t.Data == "a"
-				if isAnchor {
-					// found a link
-					for _, a := range t.Attr {
-						if !(a.Key == "href") {
-							continue
-						}
-						isFullLink := strings.Index(a.Val, "http") == 0
-						if !isFullLink {
-								continue
-						}
-						// if link has http, add to array
-						foundUrl = append(foundUrl, a.Val)
-					}
-				}
-			}
-		}
-	*/
-
 }
