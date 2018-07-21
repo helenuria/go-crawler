@@ -4,32 +4,37 @@
 {{if .Success}}
 
   <head>
-      <meta charset="utf-8" />
-      <title>D3 Demo</title>
-      <script src="https://d3js.org/d3.v5.min.js"></script>
+    <meta charset="utf-8" />
+    <title>D3 Demo</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
   </head>
   <body>
-      <h1>Crawling https://en.wikipedia.org/wiki/Dog</h1>
+      <h1>Crawling {{.CrawlUrl}}</h1>
       <svg width="960" height="600"></svg>
       <script>
-        // templated based on the string in the Graph struct
-        var json = JSON.parse({{.Graph}})
-        // destructure JSON to variables
-        var { nodes, links } = json;
-        // vertices to the graph
-
-        // get height and width from user
-        var width = window.innerWidth
-        var height = window.innerHeight
+        // These two maps are inefficient. Will need to refactor the backend to be in the correct format.
+        var nodes = JSON.parse({{.Nodes}}).map(obj => { 
+            obj.id = obj.Url;
+            return obj;
+        })
+        // can be refactored on the backend by specifying `json:"target"` and `json:"source"`
+        var links = JSON.parse({{.Links}}).map(obj => _.mapKeys(obj, (value, key) => { 
+            return key.toLowerCase();
+        }))
 
         // set SVG element to size of height and width
-        var svg = d3.select('svg')
-        svg.attr('width', width).attr('height', height)
+        const width = window.innerWidth
+        const height = window.innerHeight
+        const svg = d3.select('svg')
+            .attr('width', width)
+            .attr('height', height)
+
 
         // edge simulation
         var linkForce = d3
             .forceLink()
-            .id((link) => { return link.id })
+            .id(link => link.id)
             .strength((link) => .7)
             .distance(d => 100)
 
@@ -37,7 +42,7 @@
         var simulation = d3
             .forceSimulation()
             .force('link', linkForce)
-            .force('charge', d3.forceManyBody().strength(-800))
+            .force('charge', d3.forceManyBody().strength(-80))
             .force('center', d3.forceCenter(width / 2, height / 2))
 
         // drag and drop to play with graph
@@ -59,9 +64,14 @@
         // used to open URL
         function openTab(selectedNode) {
             window.open(
-                selectedNode.label,
+                selectedNode.Url,
                 '_blank'
             );
+        }
+
+        function zoomed() {
+            linkElements.attr("transform", d3.event.transform);
+            nodeElements.attr("transform", d3.event.transform);
         }
 
         // styling for edges
@@ -72,6 +82,10 @@
             .enter().append("line")
             .attr("stroke-width", 1)
             .attr("stroke", "#339e6c")
+            .call(d3.zoom()
+                .scaleExtent([1 / 4, 15])
+                .on("zoom", zoomed)
+            );
 
         // styling for vertices
         var nodeElements = svg.append("g")
@@ -83,27 +97,31 @@
             .attr("r", 10)
             .call(dragDrop)
             .on('click', openTab) // open tab by clicking on vertices
+            .call(d3.zoom()
+                .scaleExtent([1 / 4, 15])
+                .on("zoom", zoomed)
+            );
 
         // styling for labels
-        var textElements = svg.append("g")
-            .attr("class", "texts")
-            .selectAll("text")
-            .data(nodes)
-            .enter().append("text")
-            .attr('fill', '#33659e')
-            .text(function (node) { return node.label })
-            .attr("font-size", 12)
-            .attr("font-family", "sans-serif")
-            .attr("dx", 15)
-            .attr("dy", 4)
+        // var textElements = svg.append("g")
+        //     .attr("class", "texts")
+        //     .selectAll("text")
+        //     .data(nodes)
+        //     .enter().append("text")
+        //     .attr('fill', '#33659e')
+        //     .text(function (node) { return node.Url })
+        //     .attr("font-size", 12)
+        //     .attr("font-family", "sans-serif")
+        //     .attr("dx", 15)
+        //     .attr("dy", 4)
 
         simulation.nodes(nodes).on('tick', () => {
             nodeElements
                 .attr('cx', (node) => node.x)
                 .attr('cy', (node) => node.y)
-            textElements
-                .attr('x', (node) => node.x)
-                .attr('y', (node) => node.y)
+            // textElements
+            //     .attr('x', (node) => node.x)
+            //     .attr('y', (node) => node.y)
             linkElements
                 .attr('x1', (link) => link.source.x)
                 .attr('y1', (link) => link.source.y)
@@ -113,6 +131,7 @@
 
         simulation.force("link").links(links)
       </script>
+
   </body>
 
 {{else}}

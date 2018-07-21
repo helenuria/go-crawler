@@ -12,7 +12,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-
 	"github.com/helenuria/go-crawler"
 )
 
@@ -29,7 +28,10 @@ type Crawl struct {
 }
 
 type Graph struct {
-	//
+	Nodes 		string
+	Links 		string
+	Success 	bool
+	CrawlUrl	string
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -51,19 +53,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%+v\n", crawl) // debug
 
 	// Populate crawl graph.
-	// Dom: Crawl() returns Nodes, Edges, Errors
-	// ...replace the _ with whatever variables you want to pass to parser
-	_, _, _ = crawler.Crawl(crawl.Url)
-
+	crawl_nodes, crawl_links, _ := crawler.Crawl(crawl.Url)
+	// fmt.Println("vertices:\n", (crawl_nodes), "\nedges:\n", (crawl_links))
+	json := Graph{Nodes: string(crawl_nodes), Links: string(crawl_links), Success: true, CrawlUrl: crawl.Url}
 	// Render graph.
-	tmpl.Execute(w, struct{ Success bool }{true})
+	tmpl.Execute(w, json)
 }
 
 func main() {
 	flag.Parse()
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(":80", nil)
-
 	if err := http.ListenAndServe(*addr, nil); err != nil {
 		log.Fatal(err)
 	}
