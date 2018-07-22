@@ -9,7 +9,7 @@ Welcome!
 ## Instructions
 Skip to your system build if you already have Go installed. 
 
-### [Download and Install Go][install]
+### [Download and install Go][install]
 Work through [How to Write Go Code][code] to set up your workspace. 
 
 [install]: https://golang.org/doc/install
@@ -57,7 +57,7 @@ $ go build
 $ web.exe
 ```
 
-#### Mac build
+#### Mac 
 
 ##### Quick 
 ```
