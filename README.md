@@ -6,26 +6,75 @@ Welcome!
 * James Wilson
 * Dominic Phan
 
+## Instructions ##
+Skip to your system build if you already have Go installed. 
+
+### [Download and Install Go][install] ###
+* Work through [How to Write Go Code][code] to set up your workspace. 
+
+[install]: https://golang.org/doc/install
+[code]: https://golang.org/doc/code.html
+
+### Linux build ###
+
+#### Quick ####
+`
+$ **go get github.com/helenuria/go-crawler**
+$ **[sudo] $GOPATH/bin/web**
+`
+
+#### Development ####
+`
+$ **go get github.com/helenuria/go-crawler**
+$ **cd $GOPATH/src/github.com/helenuria/go-crawler/web**
+`
+* Make some changes or build as is.
+`
+$ **go build**
+$ **[sudo] ./web**
+`
+
 ### Windows build ###
-* navigate to the project's "/web/" dir
-* run the command "go get golang.org/x/net/html"
-* run the command "go build"
-* run "web.exe"
-* navigate to localhost:80 in your browser.
-* Submit some data and watch the console output how the submitted form data is stored.
-* Interactive demo graph displayed after posting form
+
+#### Quick ####
+`
+$ **go get golang.org/x/net/html**
+$ **go get github.com/helenuria/go-crawler**
+$ **$GOPATH/bin/web.exe**
+`
+
+#### Development ####
+`
+$ **go get golang.org/x/net/html**
+$ **go get github.com/helenuria/go-crawler**
+$ **cd $GOPATH/src/github.com/helenuria/go-crawler/web**
+`
+* Make some changes or build as is.
+`
+$ **go build**
+$ **web.exe**
+`
 
 ### Mac build ###
-* navigate to the project's `/web` directory
-* run the command `go build`
-* run the command `./web -addr :8080`
-* navigate to `localhost:8080` in your browser.
-* Submit some data and watch the console output how the submitted form data is stored.
-* Interactive demo graph displayed after posting form
 
-#### home.go ####
-* web server
-* listens on specified port
-* serves index.html to the browser
-* collects the form input and stores it in the 'crawl' struct
-* handles the crawler program and graph rendering
+#### Quick ####
+`
+$ **go get github.com/helenuria/go-crawler**
+$ **./$GOPATH/bin/web -addr :8080**
+`
+
+#### Development ####
+$ **go get github.com/helenuria/go-crawler**
+$ **cd $GOPATH/src/github.com/helenuria/go-crawler/web**
+`
+* Make some changes or build as is.
+`
+$ **go build**
+$ **./web -addr :8080**
+`
+
+### Usage ###
+* Navigate to localhost:[port] in your browser. Port is 80 or 8080 depending on your build. 
+* Submit some data and watch the console output how the submitted form data is stored.
+* Interactive graph displayed after posting form.
+
