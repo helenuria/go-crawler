@@ -18,10 +18,8 @@ Skip to your system build if you already have Go installed.
 ### Linux build ###
 
 #### Quick ####
-`
-$ **go get github.com/helenuria/go-crawler**
-$ **[sudo] $GOPATH/bin/web**
-`
+`$ **go get github.com/helenuria/go-crawler**`
+`$ **[sudo] $GOPATH/bin/web**`
 
 #### Development ####
 `
