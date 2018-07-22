@@ -1,29 +1,31 @@
-# Graphical Web Crawler #
+# Graphical Web Crawler 
 Welcome!
 
-## Team Crater ##
+## Team Crater 
 * Helen Stockman
 * James Wilson
 * Dominic Phan
 
-## Instructions ##
+## Instructions
 Skip to your system build if you already have Go installed. 
 
-### [Download and Install Go][install] ###
-* Work through [How to Write Go Code][code] to set up your workspace. 
+### [Download and Install Go][install]
+Work through [How to Write Go Code][code] to set up your workspace. 
 
 [install]: https://golang.org/doc/install
 [code]: https://golang.org/doc/code.html
 
-### Linux build ###
+### Build and run
 
-#### Quick ####
+#### Linux 
+
+##### Quick
 ```
 $ **go get github.com/helenuria/go-crawler**
 $ **[sudo] $GOPATH/bin/web**
 ```
 
-#### Development ####
+#### Development
 ```
 $ **go get github.com/helenuria/go-crawler**
 $ **cd $GOPATH/src/github.com/helenuria/go-crawler/web**
@@ -34,16 +36,16 @@ $ **go build**
 $ **[sudo] ./web**
 ```
 
-### Windows build ###
+#### Windows
 
-#### Quick ####
+##### Quick
 ```
 $ **go get golang.org/x/net/html**
 $ **go get github.com/helenuria/go-crawler**
 $ **$GOPATH/bin/web.exe**
 ```
 
-#### Development ####
+##### Development 
 ```
 $ **go get golang.org/x/net/html**
 $ **go get github.com/helenuria/go-crawler**
@@ -55,15 +57,15 @@ $ **go build**
 $ **web.exe**
 ```
 
-### Mac build ###
+#### Mac build
 
-#### Quick ####
+##### Quick 
 ```
 $ **go get github.com/helenuria/go-crawler**
 $ **./$GOPATH/bin/web -addr :8080**
 ```
 
-#### Development ####
+##### Development
 ```
 $ **go get github.com/helenuria/go-crawler**
 $ **cd $GOPATH/src/github.com/helenuria/go-crawler/web**
@@ -74,7 +76,7 @@ $ **go build**
 $ **./web -addr :8080**
 ```
 
-### Usage ###
+### Usage 
 * Navigate to localhost:[port] in your browser. Port is 80 or 8080 depending on your build. 
 * Submit some data and watch the console output how the submitted form data is stored.
 * Interactive graph displayed after posting form.
