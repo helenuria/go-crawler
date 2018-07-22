@@ -13,6 +13,7 @@
       <h1>Crawling {{.CrawlUrl}}</h1>
       <svg width="960" height="600"></svg>
       <script>
+
         // These two maps are inefficient. Will need to refactor the backend to be in the correct format.
         var nodes = JSON.parse({{.Nodes}}).map(obj => { 
             obj.id = obj.Url;
@@ -69,10 +70,13 @@
             );
         }
 
+
         function zoomed() {
             linkElements.attr("transform", d3.event.transform);
             nodeElements.attr("transform", d3.event.transform);
         }
+
+
 
         // styling for edges
         var linkElements = svg.append("g")
@@ -86,6 +90,7 @@
                 .scaleExtent([1 / 4, 15])
                 .on("zoom", zoomed)
             );
+
 
         // styling for vertices
         var nodeElements = svg.append("g")
@@ -115,13 +120,16 @@
         //     .attr("dx", 15)
         //     .attr("dy", 4)
 
+
         simulation.nodes(nodes).on('tick', () => {
             nodeElements
                 .attr('cx', (node) => node.x)
                 .attr('cy', (node) => node.y)
+
             // textElements
             //     .attr('x', (node) => node.x)
             //     .attr('y', (node) => node.y)
+
             linkElements
                 .attr('x1', (link) => link.source.x)
                 .attr('y1', (link) => link.source.y)
