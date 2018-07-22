@@ -2,9 +2,9 @@
 Welcome!
 
 ## Team Crater 
- Helen Stockman
- James Wilson
- Dominic Phan
+* Helen Stockman
+* James Wilson
+* Dominic Phan
 
 ## Instructions
 Skip to your system build if you already have Go installed. 
@@ -77,8 +77,8 @@ $ ./web -addr :8080
 ```
 
 ### Usage 
- Navigate to `localhost:[port]` in your browser. Where port is `80` or `8080` depending on your build. 
- Submit some data and watch the console output how the submitted form data is stored.
- Interactive graph displayed after posting form.
+* Navigate to `localhost:[port]` in your browser. Where port is `80` or `8080` depending on your build. 
+* Submit some data and watch the console output how the submitted form data is stored.
+* Interactive graph displayed after posting form.
 
 
