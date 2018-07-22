@@ -13,13 +13,13 @@ import (
 )
 
 type Vertex struct {
-	url              string
-	keywordHighlight bool
+	Url              string
+	KeywordHighlight bool
 }
 
 type Edge struct {
-	target string
-	source string
+	Target string
+	Source string
 }
 
 type Page struct {
@@ -86,26 +86,26 @@ func Crawl(startingUrl string) ([]byte, []byte, error) {
 	for pageUrl, page := range pages {
 		// create vertex and add to graph
 		v := new(Vertex)
-		v.url = pageUrl
-		v.keywordHighlight = false
+		v.Url = pageUrl
+		v.KeywordHighlight = false
 
 		for _, link := range page.links {
 			e := new(Edge)
-			e.target = link
-			e.source = pageUrl
+			e.Target = link
+			e.Source = pageUrl
 			Edges = append(Edges, *e)
 		}
 
 		Vertices = append(Vertices, *v)
 	}
-
+	//fmt.Println("Vertices: ", Vertices, "\nEdges: ", Edges)
 	vJson, err := json.Marshal(Vertices)
 	eJson, err2 := json.Marshal(Edges)
 	if err != nil && err2 != nil {
 		log.Printf("couldnt parsse json: %v, %v", err, err2)
 		return nil, nil, err
 	}
-	// fmt.Println("Vertices: ", vJson, "\nEdges: ", eJson)
+	//fmt.Println("Vertices: ", string(vJson), "\nEdges: ", string(eJson))
 	return vJson, eJson, nil
 }
 
