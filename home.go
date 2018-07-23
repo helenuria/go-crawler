@@ -13,7 +13,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/helenuria/go-crawler"
+	"github.com/helenuria/go-crawler/crawler"
         "google.golang.org/appengine"
 )
 
@@ -30,9 +30,9 @@ type Crawl struct {
 }
 
 type Graph struct {
-	Nodes 		string
-	Links 		string
-	Success 	bool
+	Nodes		string
+	Links		string
+	Success	bool
 	CrawlUrl	string
 }
 
@@ -69,5 +69,5 @@ func main() {
 	if err := http.ListenAndServe(*addr, nil); err != nil {
 		log.Fatal(err)
 	}
-
+        appengine.Main() // Starts the server to receive requests.
 }

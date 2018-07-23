@@ -9,7 +9,7 @@ import (
 	"math/rand"             // for getting random numbers
 	"net/http"              // really useful http package in stdlib
 	"net/url"
-	"time" // for seeding the random number
+	"time"                  // for seeding the random number
 )
 
 type Vertex struct {
