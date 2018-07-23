@@ -16,14 +16,11 @@ import (
 	"net/http"              // really useful http package in stdlib
 	"net/url"
 	"time"                  // for seeding the random number
-
 	"flag"
-	//"fmt"
 	"html/template"
-	//"log"
-	//"net/http"
 
     "google.golang.org/appengine"
+    "google.golang.org/appengine/urlfetch"
 )
 
 var (
@@ -96,9 +93,12 @@ func Crawl(startingUrl string) ([]byte, []byte, error) {
 		}
 
 		// ...and randomize the order (because we'll have to pop them in order)
+		// Google cloud app engine supports Go 1.9. "math/rand".Shuffle implemented in Go 1.10
+		/*
 		rand.Shuffle(len(links), func(i, j int) {
 			links[i], links[j] = links[j], links[i]
 		})
+		*/
 
 		// ...then mark the current link as visited.
 		pages[top] = Page{links: links, visited: true}
@@ -147,9 +147,24 @@ func retrieveBody(pageUrl string) ([]string, error) {
 	// in go, functions return two things, the return value and any errors
 	// this double assignment takes the return value and error from .Get()
 	// and assigns them to variables resp and err respectively
+	/*
 	resp, err := http.Get(pageUrl)
+	
+	
 
 	if err != nil {
+		return nil, fmt.Errorf("http transport error is: %v", err)
+	}
+	*/
+	
+	// Fixing Google cloud app engine error:
+	//couldnt retrieve body: http transport error is: Get https://someurl.com: http.DefaultTransport and http.DefaultClient are not available in App Engine. See https://cloud.google.com/appengine/docs/go/urlfetch/
+	var r *http.Request
+	ctx := appengine.NewContext(r)
+    client := urlfetch.Client(ctx)
+    resp, err := client.Get(pageUrl)
+    
+    if err != nil {
 		return nil, fmt.Errorf("http transport error is: %v", err)
 	}
 
@@ -225,9 +240,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 	http.HandleFunc("/", handler)
+	/*
 	http.ListenAndServe(":80", nil)
 	if err := http.ListenAndServe(*addr, nil); err != nil {
 		log.Fatal(err)
 	}
+	*/
         appengine.Main() // Starts the server to receive requests.
 }
