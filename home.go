@@ -59,7 +59,7 @@ type Page struct {
 
 const DEPTH = 30
 
-func Crawl(startingUrl string) ([]byte, []byte, error) {
+func Crawl(startingUrl string, r *http.Request) ([]byte, []byte, error) {
 	// seed the random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
 
@@ -86,7 +86,7 @@ func Crawl(startingUrl string) ([]byte, []byte, error) {
 		}
 
 		// Get the links from the top link...
-		links, err := retrieveBody(top)
+		links, err := retrieveBody(top, r)
 		if err != nil {
 			log.Printf("couldnt retrieve body: %v", err)
 			continue
@@ -143,7 +143,7 @@ func Crawl(startingUrl string) ([]byte, []byte, error) {
 }
 
 // retrieveBody gets the html body at a url and return a slice of links in that body
-func retrieveBody(pageUrl string) ([]string, error) {
+func retrieveBody(pageUrl string, r *http.Request) ([]string, error) {
 	// in go, functions return two things, the return value and any errors
 	// this double assignment takes the return value and error from .Get()
 	// and assigns them to variables resp and err respectively
@@ -159,7 +159,7 @@ func retrieveBody(pageUrl string) ([]string, error) {
 	
 	// Fixing Google cloud app engine error:
 	//couldnt retrieve body: http transport error is: Get https://someurl.com: http.DefaultTransport and http.DefaultClient are not available in App Engine. See https://cloud.google.com/appengine/docs/go/urlfetch/
-	var r *http.Request
+	//var r *http.Request
 	ctx := appengine.NewContext(r)
     client := urlfetch.Client(ctx)
     resp, err := client.Get(pageUrl)
@@ -230,7 +230,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%+v\n", crawl) // debug
 
 	// Populate crawl graph.
-	crawl_nodes, crawl_links, _ := Crawl(crawl.Url)
+	crawl_nodes, crawl_links, _ := Crawl(crawl.Url, r)
 	// fmt.Println("vertices:\n", (crawl_nodes), "\nedges:\n", (crawl_links))
 	json := Graph{Nodes: string(crawl_nodes), Links: string(crawl_links), Success: true, CrawlUrl: crawl.Url}
 	// Render graph.
