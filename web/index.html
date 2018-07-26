@@ -11,7 +11,6 @@
   <style>
     circle + text {
       display: none;
-      font: 10px sans-serif;
     }
   
     circle:hover {
@@ -44,6 +43,10 @@
     const svg = d3.select('svg')
       .attr('width', width)
       .attr('height', height)
+      .call(d3.zoom()
+        .scaleExtent([1 / 4, 15])
+        .on("zoom", zoomed)
+      );
 
 
     // edge simulation
@@ -96,31 +99,25 @@
       .data(links)
       .enter().append("line")
       .attr("stroke-width", 1)
-      .attr("stroke", "#339e6c")
-      .call(d3.zoom()
-        .scaleExtent([1 / 4, 15])
-        .on("zoom", zoomed)
-      );
+      .attr("stroke", "#3de06e")
+
 
     // styling for vertices
-    var nodeElements = svg.selectAll("g")
+    var nodeElements = svg.selectAll("foo")
       .data(nodes)
         .enter().append("g")
 
     var circles = nodeElements.append("circle")
       .attr("r", 10)
-      .attr('fill', '#4f339e')
+      .attr('fill', '#553de0')
       .call(dragDrop)
       .on('click', openTab) // open tab by clicking on vertices
-      .call(d3.zoom()
-        .scaleExtent([1 / 4, 15])
-        .on("zoom", zoomed)
-      )
+
 
     //styling for labels
     var textElements = nodeElements.append("text")
       .attr("dy", ".35em")
-      .attr('fill', '#5f7ec7')
+      .attr('fill', '#553de0')
       .text(function (node) { return node.Url })
       .attr("font-size", 12)
       .attr("font-family", "sans-serif")
