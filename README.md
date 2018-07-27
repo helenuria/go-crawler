@@ -1,31 +1,25 @@
-# Graphical Web Crawler #
+# Graphical Web Crawler 
 Welcome!
 
-## Team Crater ##
+This branch houses the deployment version of the program as a web app.
+It is hosted using the Google Cloud App Engine at [https://crater-211104.appspot.com][app]
+
+[app]: https://crater-211104.appspot.com
+
+## Team Crater 
 * Helen Stockman
 * James Wilson
 * Dominic Phan
 
-### Windows build ###
-* navigate to the project's "/web/" dir
-* run the command "go get golang.org/x/net/html"
-* run the command "go build"
-* run "web.exe"
-* navigate to localhost:80 in your browser.
-* Submit some data and watch the console output how the submitted form data is stored.
-* Interactive demo graph displayed after posting form
+## Instructions
+From the Google Cloud Platform project dashboard, select `Activate Google Cloud Shell`.
+Set up your workspace and clone this repo.
 
-### Mac build ###
-* navigate to the project's `/web` directory
-* run the command `go build`
-* run the command `./web -addr :8080`
-* navigate to `localhost:8080` in your browser.
-* Submit some data and watch the console output how the submitted form data is stored.
-* Interactive demo graph displayed after posting form
+* Test - `$ dev_appserver.py app.yaml` and select `Web Preview`.
+* Deploy - `$ gcloud app deploy`
+* View - `$ gcloud app browse`
 
-#### home.go ####
-* web server
-* listens on specified port
-* serves index.html to the browser
-* collects the form input and stores it in the 'crawl' struct
-* handles the crawler program and graph rendering
+## Resources
+https://cloud.google.com/appengine/docs/standard/go/tools/using-local-server
+https://cloud.google.com/appengine/docs/flexible/go/testing-and-deploying-your-app 
+

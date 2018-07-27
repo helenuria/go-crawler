@@ -1,16 +1,41 @@
-// TODO: build keywordHighlight feature
-package crawler
+// main.go uses th Google Cloud
+// App Engine to host the crawler app.
+// It gets the crawl settings by form, 
+// crawls, and graphs the crawl with D3.js.
+// TODO build keywordHighlight feature
+// TODO add past starting urls using cookies/sessions
+package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"                   // output
 	"golang.org/x/net/html" // parse html
-	"log"                   // error logging
-	"math/rand"             // for getting random numbers
-	"net/http"              // really useful http package in stdlib
+	"html/template"
+	"log"       // error logging
+	"math/rand" // for getting random numbers
+	"net/http"  // really useful http package in stdlib
 	"net/url"
 	"time" // for seeding the random number
+
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/urlfetch"
 )
+
+type CrawlSettings struct {
+	Url     string // Start
+	Keyword string // Optional
+	Type    string // "B" or "D"
+	BL      string // Breadth limit
+	DL      string // Depth limit
+}
+
+type Graph struct {
+	Nodes    string
+	Links    string
+	Success  bool
+	CrawlUrl string
+}
 
 type Vertex struct {
 	Url              string
@@ -29,7 +54,7 @@ type Page struct {
 
 const DEPTH = 30
 
-func Crawl(startingUrl string) ([]byte, []byte, error) {
+func Crawl(startingUrl string, r *http.Request) ([]byte, []byte, error) {
 	// seed the random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
 
@@ -56,16 +81,19 @@ func Crawl(startingUrl string) ([]byte, []byte, error) {
 		}
 
 		// Get the links from the top link...
-		links, err := retrieveBody(top)
+		links, err := retrieveBody(top, r)
 		if err != nil {
 			log.Printf("couldnt retrieve body: %v", err)
 			continue
 		}
 
 		// ...and randomize the order (because we'll have to pop them in order)
-		rand.Shuffle(len(links), func(i, j int) {
-			links[i], links[j] = links[j], links[i]
-		})
+		// gcloud app engine supports Go 1.9. "math/rand".Shuffle implemented in Go 1.10
+		/*
+			rand.Shuffle(len(links), func(i, j int) {
+				links[i], links[j] = links[j], links[i]
+			})
+		*/
 
 		// ...then mark the current link as visited.
 		pages[top] = Page{links: links, visited: true}
@@ -102,7 +130,7 @@ func Crawl(startingUrl string) ([]byte, []byte, error) {
 	vJson, err := json.Marshal(Vertices)
 	eJson, err2 := json.Marshal(Edges)
 	if err != nil && err2 != nil {
-		log.Printf("couldnt parsse json: %v, %v", err, err2)
+		log.Printf("couldnt parse json: %v, %v", err, err2)
 		return nil, nil, err
 	}
 	//fmt.Println("Vertices: ", string(vJson), "\nEdges: ", string(eJson))
@@ -110,12 +138,12 @@ func Crawl(startingUrl string) ([]byte, []byte, error) {
 }
 
 // retrieveBody gets the html body at a url and return a slice of links in that body
-func retrieveBody(pageUrl string) ([]string, error) {
-	// in go, functions return two things, the return value and any errors
-	// this double assignment takes the return value and error from .Get()
-	// and assigns them to variables resp and err respectively
-	resp, err := http.Get(pageUrl)
+func retrieveBody(pageUrl string, r *http.Request) ([]string, error) {
+	// Set up App Engine client, https://cloud.google.com/appengine/docs/go/urlfetch/
+	ctx := appengine.NewContext(r)
+	client := urlfetch.Client(ctx)
 
+	resp, err := client.Get(pageUrl)
 	if err != nil {
 		return nil, fmt.Errorf("http transport error is: %v", err)
 	}
@@ -131,7 +159,7 @@ func retrieveBody(pageUrl string) ([]string, error) {
 	// extract html body
 	body := resp.Body
 
-	// set up map for urls
+	// set up slice for urls
 	var foundUrl []string
 
 	// parse html body for urls
@@ -161,3 +189,36 @@ func retrieveBody(pageUrl string) ([]string, error) {
 
 	return foundUrl, err
 }
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("index.html"))
+
+	if r.Method != http.MethodPost {
+		tmpl.Execute(w, nil)
+		return
+	}
+
+	crawl := CrawlSettings{
+		Url:     r.FormValue("Url"),
+		Keyword: r.FormValue("Keyword"),
+		Type:    r.FormValue("Type"),
+		BL:      r.FormValue("BL"),
+		DL:      r.FormValue("DL"),
+	}
+	// Crawl settings is now populated.
+	//fmt.Printf("%+v\n", crawl) // debug
+
+	// Populate crawl graph.
+	crawl_nodes, crawl_links, _ := Crawl(crawl.Url, r)
+	// fmt.Println("vertices:\n", (crawl_nodes), "\nedges:\n", (crawl_links))
+	json := Graph{Nodes: string(crawl_nodes), Links: string(crawl_links), Success: true, CrawlUrl: crawl.Url}
+	// Render graph.
+	tmpl.Execute(w, json)
+}
+
+func main() {
+	flag.Parse()
+	http.HandleFunc("/", handler)
+	appengine.Main() // Starts the server to receive requests.
+}
+
