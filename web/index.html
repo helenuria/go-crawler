@@ -14,11 +14,21 @@
     }
   
     circle:hover {
-      fill: #000;
+      fill: #3dafe0;
     }
   
     circle:hover + text {
       display: inline;
+      position: absolute;
+    }
+
+    text {
+      text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+      position: relative;
+    }
+    circle {
+      position: relative;
+      z-index: 1;
     }
   </style>
 </head>
@@ -36,7 +46,7 @@
     var links = JSON.parse({{.Links }}).map(obj => _.mapKeys(obj, (value, key) => {
       return key.toLowerCase();
     }))
-
+    console.log(nodes);
     // set SVG element to size of height and width
     const width = window.innerWidth
     const height = window.innerHeight
@@ -53,14 +63,14 @@
     var linkForce = d3
       .forceLink()
       .id(link => link.id)
-      .strength((link) => .7)
+      .strength((link) => .4)
       .distance(d => 100)
 
     // node simulation
     var simulation = d3
       .forceSimulation()
       .force('link', linkForce)
-      .force('charge', d3.forceManyBody().strength(-200))
+      .force('charge', d3.forceManyBody().strength(-500))
       .force('center', d3.forceCenter(width / 2, height / 2))
 
     // drag and drop to play with graph
@@ -92,6 +102,7 @@
       nodeElements.attr("transform", d3.event.transform);
     }
 
+        
     // styling for edges
     var linkElements = svg.append("g")
       .attr("class", "links")
@@ -108,18 +119,17 @@
         .enter().append("g")
 
     var circles = nodeElements.append("circle")
-      .attr("r", 10)
+      .attr("r", 15)
       .attr('fill', '#553de0')
       .call(dragDrop)
       .on('click', openTab) // open tab by clicking on vertices
-
-
+    
     //styling for labels
     var textElements = nodeElements.append("text")
       .attr("dy", ".35em")
-      .attr('fill', '#553de0')
+      .attr('fill', '#3dafe0')
       .text(function (node) { return node.Url })
-      .attr("font-size", 12)
+      .attr("font-size", 42)
       .attr("font-family", "sans-serif")
 
 
@@ -128,13 +138,14 @@
         .attr('cx', node => node.x)
         .attr('cy', node => node.y)
       textElements
-        .attr('x', node => node.x + 12)
+        .attr('x', node => node.x + 30)
         .attr('y', node => node.y)
       linkElements
         .attr('x1', link => link.source.x)
         .attr('y1', link => link.source.y)
         .attr('x2', link => link.target.x)
         .attr('y2', link => link.target.y)
+
     })
 
     simulation.force("link").links(links)
