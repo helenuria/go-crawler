@@ -1,30 +1,25 @@
-// home.go runs the homepage,
-// provides the user form,
-// stores the response in
-// in some format, crawls,
-// then graphs the crawl.
-// TODO: build keywordHighlight feature
+// main.go uses th Google Cloud
+// App Engine to host the crawler app.
+// It gets the crawl settings by form, 
+// crawls, and graphs the crawl with D3.js.
+// TODO build keywordHighlight feature
 // TODO add past starting urls using cookies/sessions
 package main
 
 import (
-    "encoding/json"
+	"encoding/json"
+	"flag"
 	"fmt"                   // output
 	"golang.org/x/net/html" // parse html
-	"log"                   // error logging
-	"math/rand"             // for getting random numbers
-	"net/http"              // really useful http package in stdlib
-	"net/url"
-	"time"                  // for seeding the random number
-	"flag"
 	"html/template"
+	"log"       // error logging
+	"math/rand" // for getting random numbers
+	"net/http"  // really useful http package in stdlib
+	"net/url"
+	"time" // for seeding the random number
 
-    "google.golang.org/appengine"
-    "google.golang.org/appengine/urlfetch"
-)
-
-var (
-	addr = flag.String("addr", ":80", "address for the server to listen on")
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/urlfetch"
 )
 
 type CrawlSettings struct {
@@ -36,10 +31,10 @@ type CrawlSettings struct {
 }
 
 type Graph struct {
-	Nodes		string
-	Links		string
-	Success	bool
-	CrawlUrl	string
+	Nodes    string
+	Links    string
+	Success  bool
+	CrawlUrl string
 }
 
 type Vertex struct {
@@ -93,11 +88,11 @@ func Crawl(startingUrl string, r *http.Request) ([]byte, []byte, error) {
 		}
 
 		// ...and randomize the order (because we'll have to pop them in order)
-		// Google cloud app engine supports Go 1.9. "math/rand".Shuffle implemented in Go 1.10
+		// gcloud app engine supports Go 1.9. "math/rand".Shuffle implemented in Go 1.10
 		/*
-		rand.Shuffle(len(links), func(i, j int) {
-			links[i], links[j] = links[j], links[i]
-		})
+			rand.Shuffle(len(links), func(i, j int) {
+				links[i], links[j] = links[j], links[i]
+			})
 		*/
 
 		// ...then mark the current link as visited.
@@ -135,7 +130,7 @@ func Crawl(startingUrl string, r *http.Request) ([]byte, []byte, error) {
 	vJson, err := json.Marshal(Vertices)
 	eJson, err2 := json.Marshal(Edges)
 	if err != nil && err2 != nil {
-		log.Printf("couldnt parsse json: %v, %v", err, err2)
+		log.Printf("couldnt parse json: %v, %v", err, err2)
 		return nil, nil, err
 	}
 	//fmt.Println("Vertices: ", string(vJson), "\nEdges: ", string(eJson))
@@ -144,27 +139,12 @@ func Crawl(startingUrl string, r *http.Request) ([]byte, []byte, error) {
 
 // retrieveBody gets the html body at a url and return a slice of links in that body
 func retrieveBody(pageUrl string, r *http.Request) ([]string, error) {
-	// in go, functions return two things, the return value and any errors
-	// this double assignment takes the return value and error from .Get()
-	// and assigns them to variables resp and err respectively
-	/*
-	resp, err := http.Get(pageUrl)
-	
-	
-
-	if err != nil {
-		return nil, fmt.Errorf("http transport error is: %v", err)
-	}
-	*/
-	
-	// Fixing Google cloud app engine error:
-	//couldnt retrieve body: http transport error is: Get https://someurl.com: http.DefaultTransport and http.DefaultClient are not available in App Engine. See https://cloud.google.com/appengine/docs/go/urlfetch/
-	//var r *http.Request
+	// Set up App Engine client, https://cloud.google.com/appengine/docs/go/urlfetch/
 	ctx := appengine.NewContext(r)
-    client := urlfetch.Client(ctx)
-    resp, err := client.Get(pageUrl)
-    
-    if err != nil {
+	client := urlfetch.Client(ctx)
+
+	resp, err := client.Get(pageUrl)
+	if err != nil {
 		return nil, fmt.Errorf("http transport error is: %v", err)
 	}
 
@@ -179,7 +159,7 @@ func retrieveBody(pageUrl string, r *http.Request) ([]string, error) {
 	// extract html body
 	body := resp.Body
 
-	// set up map for urls
+	// set up slice for urls
 	var foundUrl []string
 
 	// parse html body for urls
@@ -210,7 +190,6 @@ func retrieveBody(pageUrl string, r *http.Request) ([]string, error) {
 	return foundUrl, err
 }
 
-
 func handler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("index.html"))
 
@@ -227,7 +206,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		DL:      r.FormValue("DL"),
 	}
 	// Crawl settings is now populated.
-	fmt.Printf("%+v\n", crawl) // debug
+	//fmt.Printf("%+v\n", crawl) // debug
 
 	// Populate crawl graph.
 	crawl_nodes, crawl_links, _ := Crawl(crawl.Url, r)
@@ -240,11 +219,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 	http.HandleFunc("/", handler)
-	/*
-	http.ListenAndServe(":80", nil)
-	if err := http.ListenAndServe(*addr, nil); err != nil {
-		log.Fatal(err)
-	}
-	*/
-        appengine.Main() // Starts the server to receive requests.
+	appengine.Main() // Starts the server to receive requests.
 }
+
