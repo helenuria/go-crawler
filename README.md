@@ -19,3 +19,7 @@ Set up your workspace and clone this repo.
 * Deploy - `$ gcloud app deploy`
 * View - `$ gcloud app browse`
 
+## Resources
+https://cloud.google.com/appengine/docs/standard/go/tools/using-local-server
+https://cloud.google.com/appengine/docs/flexible/go/testing-and-deploying-your-app 
+
