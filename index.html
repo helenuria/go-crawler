@@ -24,7 +24,7 @@
     }
 
     text {
-      text-shadow: 2px 0 0 #fff, -2px 0 0 #fff, 0 2px 0 #fff, 0 -2px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+      text-shadow: 1px 0 0 #fff, -1px 0 0 #fff, 0 1px 0 #fff, 0 -1px 0 #fff, 0.5px 0.5px #fff, -0.5px -0.5px 0 #fff, 0.5px -0.5px 0 #fff, -0.5px 0.5px 0 #fff;
       position: relative;
     }
     circle {
@@ -147,15 +147,13 @@
     <main role="main" class="inner cover">
       <h1 class="cover-heading">{{.CrawlUrl}}</h1>
       <p class="lead">Click on the nodes to visit a page</p>
-      <p class="lead">
-
-      </p>
+      <p class="url"></p>
     </main>
     <div class="container-fluid">
       <svg width="960" height="600"></svg>
     </div>
 
-    <a href="#" class="btn btn-lg btn-secondary searchbtn">Search Again</a>
+    <a href="/" class="btn btn-lg btn-secondary searchbtn">Search Again</a>
     <br>
     <br>
     <footer class="mastfoot mt-auto">
@@ -182,6 +180,7 @@
       return key.toLowerCase();
     }))
     console.log(nodes);
+
     // set SVG element to size of height and width
     const width = window.innerWidth * .9;
     const height = window.innerHeight * .76;
@@ -244,8 +243,8 @@
       .selectAll("line")
       .data(links)
       .enter().append("line")
-      .attr("stroke-width", 1)
-      .attr("stroke", "#3de06e")
+        .attr("stroke-width", 1)
+        .attr("stroke", "#3de06e")
 
 
     // styling for vertices
@@ -255,16 +254,21 @@
 
     var circles = nodeElements.append("circle")
       .attr("r", 15)
-      .attr('fill', '#553de0')
       .call(dragDrop)
       .on('click', openTab) // open tab by clicking on vertices
+      .attr('fill', (data) => {
+        if (data.KeywordHighlight)
+          return '#fff960';
+        else
+          return '#553de0';
+      })
     
     //styling for labels
     var textElements = nodeElements.append("text")
       .attr("dy", ".35em")
       .attr('fill', '#3dafe0')
       .text(function (node) { return node.Url })
-      .attr("font-size", 42)
+      .attr("font-size", 60)
       .attr("font-family", "sans-serif")
 
 
@@ -292,9 +296,6 @@
   <!-- Placed at the end of the document so the pages load faster -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
     crossorigin="anonymous"></script>
-  <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
-  <script src="../../assets/js/vendor/popper.min.js"></script>
-  <script src="../../dist/js/bootstrap.min.js"></script>
 </body>
 
 {{else}}
