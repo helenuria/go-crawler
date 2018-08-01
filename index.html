@@ -2,193 +2,360 @@
 <html>
 {{if .Success}}
 
-  <head>
-    <meta charset="utf-8" />
-    <title>Output</title>
-    <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
-  </head>
-  <body>
-      <h1>Crawling {{.CrawlUrl}}</h1>
+<head>
+  <meta charset="utf-8" />
+  <title>D3 Demo</title>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+    crossorigin="anonymous">
+  <style>
+    circle + text {
+      display: none;
+    }
+  
+    circle:hover {
+      fill: #3dafe0;
+    }
+  
+    circle:hover + text {
+      display: inline;
+      position: absolute;
+    }
+
+    text {
+      text-shadow: 1px 0 0 #fff, -1px 0 0 #fff, 0 1px 0 #fff, 0 -1px 0 #fff, 0.5px 0.5px #fff, -0.5px -0.5px 0 #fff, 0.5px -0.5px 0 #fff, -0.5px 0.5px 0 #fff;
+      position: relative;
+    }
+    circle {
+      position: relative;
+      z-index: 1;
+    }
+    a,
+    a:focus,
+    a:hover {
+      color: #fff;
+    }
+
+    /* Custom default button */
+    .btn-secondary,
+    .btn-secondary:hover,
+    .btn-secondary:focus {
+      color: #333;
+      text-shadow: none; /* Prevent inheritance from `body` */
+      background-color: #fff;
+      border: .05rem solid #fff;
+    }
+
+    .searchbtn {
+      background-color: #454545;
+      color: #fff;
+    }
+
+    html,
+    body {
+      height: 100%;
+      background-color: #333;
+    }
+
+    body {
+      display: -ms-flexbox;
+      display: flex;
+      color: #fff;
+      text-shadow: 0 .05rem .1rem rgba(0, 0, 0, .5);
+      box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
+    }
+
+    /*
+    * Header
+    */
+    .masthead {
+      margin-bottom: 2rem;
+    }
+
+    .masthead-brand {
+      margin-bottom: 0;
+    }
+
+    .nav-masthead .nav-link {
+      padding: .25rem 0;
+      font-weight: 700;
+      color: rgba(255, 255, 255, .5);
+      background-color: transparent;
+      border-bottom: .25rem solid transparent;
+    }
+
+    .nav-masthead .nav-link:hover,
+    .nav-masthead .nav-link:focus {
+      border-bottom-color: rgba(255, 255, 255, .25);
+    }
+
+    .nav-masthead .nav-link + .nav-link {
+      margin-left: 1rem;
+    }
+
+    .nav-masthead .active {
+      color: #fff;
+      border-bottom-color: #fff;
+    }
+
+    @media (min-width: 48em) {
+      .masthead-brand {
+        float: left;
+      }
+      .nav-masthead {
+        float: right;
+      }
+    }
+
+
+    /*
+    * Cover
+    */
+    .cover {
+      padding: 0 1.5rem;
+    }
+    .cover .btn-lg {
+      padding: .75rem 1.25rem;
+      font-weight: 700;
+    }
+
+
+    /*
+    * Footer
+    */
+    .mastfoot {
+      color: rgba(255, 255, 255, .5);
+    }
+
+  </style>
+</head>
+
+<body class="text-center">
+  <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <header class="masthead mb-auto">
+      <div class="inner">
+        <h3 class="masthead-brand">Go Crawler</h3>
+        <nav class="nav nav-masthead justify-content-center">
+          <a class="nav-link active" href="#">Search</a>
+          <a class="nav-link" href="#">About</a>
+          <a class="nav-link" href="#">Contact</a>
+        </nav>
+      </div>
+    </header>
+  
+    <main role="main" class="inner cover">
+      <h1 class="cover-heading">{{.CrawlUrl}}</h1>
+      <p class="lead">Click on the nodes to visit a page</p>
+      <p class="url"></p>
+    </main>
+    <div class="container-fluid">
       <svg width="960" height="600"></svg>
-      <script>
+    </div>
 
-        // These two maps are inefficient. Will need to refactor the backend to be in the correct format.
-        var nodes = JSON.parse({{.Nodes}}).map(obj => { 
-            obj.id = obj.Url;
-            return obj;
-        })
-        // can be refactored on the backend by specifying `json:"target"` and `json:"source"`
-        var links = JSON.parse({{.Links}}).map(obj => _.mapKeys(obj, (value, key) => { 
-            return key.toLowerCase();
-        }))
+    <a href="/" class="btn btn-lg btn-secondary searchbtn">Search Again</a>
+    <br>
+    <br>
+    <footer class="mastfoot mt-auto">
+      <div class="inner">
+        <p>Created by
+          <a href="https://github.com/helenuria">Helen Stockman</a> |
+          <a href="https://github.com/wilsjame">James Wilson</a> |
+          <a href="https://github.com/domphan">Dominic Phan</a>
+        </p>
+        <p>Bootstrap template by: @mdo</p>
+      </div>
+    </footer>
+  </div>
 
-        // set SVG element to size of height and width
-        const width = window.innerWidth
-        const height = window.innerHeight
-        const svg = d3.select('svg')
-            .attr('width', width)
-            .attr('height', height)
+  
+  <script>
+    // These two maps are inefficient. Will need to refactored to the backend to be in the correct format.
+    var nodes = JSON.parse({{.Nodes }}).map(obj => {
+      obj.id = obj.Url;
+      return obj;
+    })
+    // can be refactored on the backend by specifying `json:"target"` and `json:"source"`
+    var links = JSON.parse({{.Links }}).map(obj => _.mapKeys(obj, (value, key) => {
+      return key.toLowerCase();
+    }))
+    console.log(nodes);
 
-
-        // edge simulation
-        var linkForce = d3
-            .forceLink()
-            .id(link => link.id)
-            .strength((link) => .7)
-            .distance(d => 100)
-
-        // node simulation
-        var simulation = d3
-            .forceSimulation()
-            .force('link', linkForce)
-            .force('charge', d3.forceManyBody().strength(-80))
-            .force('center', d3.forceCenter(width / 2, height / 2))
-
-        // drag and drop to play with graph
-        var dragDrop = d3.drag().on('start', (node) => {
-            node.fx = node.x
-            node.fy = node.y
-        }).on('drag', (node) => {
-            simulation.alphaTarget(0.7).restart()
-            node.fx = d3.event.x
-            node.fy = d3.event.y
-        }).on('end', (node) => {
-            if (!d3.event.active) {
-                simulation.alphaTarget(0)
-            }
-            node.fx = null
-            node.fy = null
-        })
-
-        // used to open URL
-        function openTab(selectedNode) {
-            window.open(
-                selectedNode.Url,
-                '_blank'
-            );
-        }
+    // set SVG element to size of height and width
+    const width = window.innerWidth * .9;
+    const height = window.innerHeight * .76;
+    const svg = d3.select('svg')
+      .attr('width', width)
+      .attr('height', height)
+      .call(d3.zoom()
+        .scaleExtent([1 / 30, 10])
+        .on("zoom", zoomed)
+      );
 
 
-        function zoomed() {
-            linkElements.attr("transform", d3.event.transform);
-            nodeElements.attr("transform", d3.event.transform);
-        }
+    // edge simulation
+    var linkForce = d3
+      .forceLink()
+      .id(link => link.id)
+      .strength((link) => .4)
+      .distance(d => 100)
+
+    // node simulation
+    var simulation = d3
+      .forceSimulation()
+      .force('link', linkForce)
+      .force('charge', d3.forceManyBody().strength(-500))
+      .force('center', d3.forceCenter(width / 2, height / 2))
+
+    // drag and drop to play with graph
+    var dragDrop = d3.drag().on('start', (node) => {
+      node.fx = node.x
+      node.fy = node.y
+    }).on('drag', (node) => {
+      simulation.alphaTarget(0.7).restart()
+      node.fx = d3.event.x
+      node.fy = d3.event.y
+    }).on('end', (node) => {
+      if (!d3.event.active) {
+        simulation.alphaTarget(0)
+      }
+      node.fx = null
+      node.fy = null
+    })
+
+    // used to open URL
+    function openTab(selectedNode) {
+      window.open(
+        selectedNode.Url,
+        '_blank'
+      );
+    }
+
+    function zoomed() {
+      linkElements.attr("transform", d3.event.transform);
+      nodeElements.attr("transform", d3.event.transform);
+    }
+
+        
+    // styling for edges
+    var linkElements = svg.append("g")
+      .attr("class", "links")
+      .selectAll("line")
+      .data(links)
+      .enter().append("line")
+        .attr("stroke-width", 1)
+        .attr("stroke", "#3de06e")
 
 
+    // styling for vertices
+    var nodeElements = svg.selectAll("foo")
+      .data(nodes)
+        .enter().append("g")
 
-        // styling for edges
-        var linkElements = svg.append("g")
-            .attr("class", "links")
-            .selectAll("line")
-            .data(links)
-            .enter().append("line")
-            .attr("stroke-width", 1)
-            .attr("stroke", "#339e6c")
-            .call(d3.zoom()
-                .scaleExtent([1 / 4, 15])
-                .on("zoom", zoomed)
-            );
-
-
-        // styling for vertices
-        var nodeElements = svg.append("g")
-            .attr("class", "nodes")
-            .selectAll("circle")
-            .data(nodes)
-            .enter().append("circle")
-            .attr('fill', '#4f339e')
-            .attr("r", 10)
-            .call(dragDrop)
-            .on('click', openTab) // open tab by clicking on vertices
-            .call(d3.zoom()
-                .scaleExtent([1 / 4, 15])
-                .on("zoom", zoomed)
-            );
-
-        // styling for labels
-        // var textElements = svg.append("g")
-        //     .attr("class", "texts")
-        //     .selectAll("text")
-        //     .data(nodes)
-        //     .enter().append("text")
-        //     .attr('fill', '#33659e')
-        //     .text(function (node) { return node.Url })
-        //     .attr("font-size", 12)
-        //     .attr("font-family", "sans-serif")
-        //     .attr("dx", 15)
-        //     .attr("dy", 4)
+    var circles = nodeElements.append("circle")
+      .attr("r", 15)
+      .call(dragDrop)
+      .on('click', openTab) // open tab by clicking on vertices
+      .attr('fill', (data) => {
+        if (data.KeywordHighlight)
+          return '#fff960';
+        else
+          return '#553de0';
+      })
+    
+    //styling for labels
+    var textElements = nodeElements.append("text")
+      .attr("dy", ".35em")
+      .attr('fill', '#3dafe0')
+      .text(function (node) { return node.Url })
+      .attr("font-size", 60)
+      .attr("font-family", "sans-serif")
 
 
-        simulation.nodes(nodes).on('tick', () => {
-            nodeElements
-                .attr('cx', (node) => node.x)
-                .attr('cy', (node) => node.y)
+    simulation.nodes(nodes).on('tick', () => {
+      circles
+        .attr('cx', node => node.x)
+        .attr('cy', node => node.y)
+      textElements
+        .attr('x', node => node.x + 30)
+        .attr('y', node => node.y)
+      linkElements
+        .attr('x1', link => link.source.x)
+        .attr('y1', link => link.source.y)
+        .attr('x2', link => link.target.x)
+        .attr('y2', link => link.target.y)
 
-            // textElements
-            //     .attr('x', (node) => node.x)
-            //     .attr('y', (node) => node.y)
+    })
 
-            linkElements
-                .attr('x1', (link) => link.source.x)
-                .attr('y1', (link) => link.source.y)
-                .attr('x2', (link) => link.target.x)
-                .attr('y2', (link) => link.target.y)
-        })
+    simulation.force("link").links(links)
+  </script>
 
-        simulation.force("link").links(links)
-      </script>
 
-  </body>
+  <!-- Bootstrap core JavaScript
+      ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+</body>
 
 {{else}}
-<!-- TODO: past starting urls -->
-  <style>
-  body {
-      background-color: linen;
-  }
-  .sub { display: none; }
-  :checked ~ .sub {
-      display: block;
-      margin-left: 40px;
-  }
-  </style>
 
-	<h1>Crawl</h1>
-	<form action = "/crawl/" method="POST">
-		<label>Url:</label><br />
-		<input Type="url" name="Url"><br />
-		<label>Keyword:</label><br />
-		<input type="text" name="Keyword"><br />
-    <fieldset>
-        <legend>Type</legend>
+<style>
+  body {
+    background-color: linen;
+  }
+
+  .sub {
+    display: none;
+  }
+
+  :checked~.sub {
+    display: block;
+    margin-left: 40px;
+  }
+</style>
+
+<h1>Crawl</h1>
+<form action="/crawl/" method="POST">
+  <label>Url:</label>
+  <br />
+  <input Type="url" name="Url">
+  <br />
+  <label>Keyword:</label>
+  <br />
+  <input type="text" name="Keyword">
+  <br />
+  <fieldset>
+    <legend>Type</legend>
+    <div>
+      <input type="radio" name="Type" value="B">
+      <label>Breadth-first</label>
+      <div class="sub">
         <div>
-          <input type="radio" name="Type" value="B">
-          <label>Breadth-first</label>
-          <div class="sub">
-            <div>
-              <label>Limit:</label>
-              <input type="number" name="BL" min="1" max="5">
-            </div>
-          </div>
+          <label>Limit:</label>
+          <input type="number" name="BL" min="1" max="5">
         </div>
-        <div>
-          <input type="radio" name="Type" value="D">
-          <label>Depth-first</label>
-          <div class="sub">
-            <div>
-              <label>Limit:</label>
-              <input type="number" name="DL" min="1" max="5">
-            </div>
-          </div>
-        </div>
-      </fieldset>
-    <div class="button">
-      <button type="submit">Submit</button>
+      </div>
     </div>
-	</form>
+    <div>
+      <input type="radio" name="Type" value="D">
+      <label>Depth-first</label>
+      <div class="sub">
+        <div>
+          <label>Limit:</label>
+          <input type="number" name="DL" min="1" max="5">
+        </div>
+      </div>
+    </div>
+  </fieldset>
+  <div class="button">
+    <button type="submit">Submit</button>
+  </div>
+</form>
 
 {{end}}
 
 </html>
+
+
 
