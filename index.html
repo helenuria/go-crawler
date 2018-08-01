@@ -147,7 +147,6 @@
         <nav class="nav nav-masthead justify-content-center">
           <a class="nav-link active" href="#">Search</a>
           <a class="nav-link" href="#">About</a>
-          <a class="nav-link" href="#">Contact</a>
         </nav>
       </div>
     </header>
@@ -170,58 +169,66 @@
       <p class="lead">Enter a URL to begin crawling</p>
       <p class="url"></p>
     </main>
+    <br>
     <style>
       .sub {
         display: none;
       }
     
       :checked~.sub {
-        display: block;
+        display: inline;
         margin-left: 40px;
       }
-      .form-group {
+      .crawlForm {
         background-color: rgba(255, 255, 255, .1);
         padding: 25px;
         width: 75%;
+        margin: 0 auto;
       }
     </style>
     
-    <form action="/crawl/" method="POST">
-      <div class="form-group container-fluid">
-        <label for="Url">Url:</label>
-        <br />
-        <input Type="url" name="Url" id="Url">
-        <br />
-        <label for="Keyword">Keyword:</label>
-        <br />
-        <input type="text" name="Keyword" id="Keyword">
-        <br />
-        <legend>Type</legend>
-        <div>
-          <input type="radio" name="Type" value="B">
-          <label>Breadth-first</label>
-          <div class="sub">
-            <div>
-              <label>Limit:</label>
-              <input type="number" name="BL" min="1" max="5">
+    <form action="/crawl/" method="POST" class="crawlForm" id="crawlForm">
+      <div class="form-row justify-content-center">
+        <div class="form-group col-md-4">
+          <label for="Url">Url</label>
+          <input class="form-control" Type="url" name="Url" id="Url">
+        </div>
+        <div class="col-md-1" ></div>
+        <div class="form-group col-md-2">
+          <label for="Keyword">Keyword</label>
+          <input class="form-control" type="text" name="Keyword" id="Keyword">
+        </div>
+      </div>
+      <br>
+      <div class="form-row justify-content-center">
+        <legend for="Type">Crawl Method</legend>
+        <div class="form-group col-md-4">
+          <div class="row">
+            <input type="radio" name="Type" value="B" id="bfs" class="form-check-input">
+            <label class="form-check-label" for="bfs"> Breadth-first</label>
+            <div class="sub">
+              <div>
+                <label>Depth Limit:</label>
+                <input class="form-control" type="number" name="BL" min="1" max="3">
+              </div>
             </div>
           </div>
-        </div>
-        <div>
-          <input type="radio" name="Type" value="D">
-          <label>Depth-first</label>
-          <div class="sub">
-            <div>
-              <label>Limit:</label>
-              <input type="number" name="DL" min="1" max="5">
+          <div class="row">
+            <input type="radio" name="Type" value="D" id="dfs" class="form-check-input">
+            <label class="form-check-label" for="dfs"> Depth-first</label>
+            <div class="sub">
+              <div>
+                <label>Depth Limit:</label>
+                <input class="form-control" type="number" name="DL" min="1" max="50">
+              </div>
             </div>
           </div>
         </div>
         <div class="button">
-          <button type="submit">Submit</button>
+          <br />
+          <input class="btn btn-secondary" type="submit">
         </div>
       </div>
-    
     </form>
     
     {{end}}
@@ -232,7 +239,7 @@
           <a href="https://github.com/wilsjame">James Wilson</a> |
           <a href="https://github.com/domphan">Dominic Phan</a>
         </p>
-        <p>Bootstrap template by: @mdo</p>
+        <p><small><small>Bootstrap template by: @mdo</small></small></p>
       </div>
     </footer>
   </div>
