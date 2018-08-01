@@ -43,8 +43,8 @@ type Vertex struct {
 }
 
 type Edge struct {
-	Target string
-	Source string
+	Target int
+	Source int
 }
 
 type Page struct {
@@ -247,21 +247,28 @@ func Crawl(startingUrl string, r *http.Request, crawlType string, BL string, DL 
 	var Vertices []Vertex
 	var Edges []Edge
 
-	for pageUrl, page := range pages {
+	i := 0
+	idMap := make(map[string]int)
+	for pageUrl := range pages {
 		// create vertex and add to graph
 		v := new(Vertex)
 		v.Url = pageUrl
 		v.KeywordHighlight = false
 
+		Vertices = append(Vertices, *v)
+		idMap[pageUrl] = i
+		i++
+	}
+
+	for pageUrl, page := range pages {
 		for _, link := range page.links {
 			e := new(Edge)
-			e.Target = link
-			e.Source = pageUrl
+			e.Target = idMap[link]
+			e.Source = idMap[pageUrl]
 			Edges = append(Edges, *e)
 		}
-
-		Vertices = append(Vertices, *v)
 	}
+
 	return Vertices, Edges, nil
 }
 

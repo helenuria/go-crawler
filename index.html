@@ -171,8 +171,8 @@
   
   <script>
     // These two maps are inefficient. Will need to refactored to the backend to be in the correct format.
-    var nodes = ({{.Nodes }}).map(obj => {
-      obj.id = obj.Url;
+    var nodes = ({{.Nodes }}).map((obj, idx) => {
+      obj.id = idx;
       return obj;
     })
     // can be refactored on the backend by specifying `json:"target"` and `json:"source"`
