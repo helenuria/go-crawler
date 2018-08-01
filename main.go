@@ -16,6 +16,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"google.golang.org/appengine"
@@ -51,9 +52,6 @@ type Page struct {
 	links   []string
 	visited bool
 }
-
-const DEPTH = 2
-const PAGE_LIMIT = 5
 
 // Shuffle function borrowed from
 // https://www.calhoun.io/how-to-shuffle-arrays-and-slices-in-go/
@@ -105,7 +103,7 @@ func (q *queue) length() int {
 	return len(*q)
 }
 
-func BreadthFirst(startingUrl string, r *http.Request) map[string]Page {
+func BreadthFirst(startingUrl string, r *http.Request, limit int) map[string]Page {
 	// pages will hold all the info we need to pass to the graph
 	pages := make(map[string]Page)
 
@@ -118,7 +116,7 @@ func BreadthFirst(startingUrl string, r *http.Request) map[string]Page {
 	depthCount := 0
 	levelSize := allLinks.length()
 	for allLinks.length() > 0 {
-		if depthCount >= DEPTH {
+		if depthCount >= limit {
 			break
 		}
 
@@ -171,7 +169,7 @@ func BreadthFirst(startingUrl string, r *http.Request) map[string]Page {
 	return pages
 }
 
-func DepthFirst(startingUrl string, r *http.Request) map[string]Page {
+func DepthFirst(startingUrl string, r *http.Request, limit int) map[string]Page {
 	// pages will hold all the urls we'll format for the graph
 	pages := make(map[string]Page)
 
@@ -183,7 +181,7 @@ func DepthFirst(startingUrl string, r *http.Request) map[string]Page {
 
 	visitCount := 0
 	for allLinks.length() > 0 {
-		if visitCount >= PAGE_LIMIT {
+		if visitCount >= limit {
 			break
 		}
 
@@ -225,13 +223,24 @@ func DepthFirst(startingUrl string, r *http.Request) map[string]Page {
 	return pages
 }
 
-func Crawl(startingUrl string, r *http.Request, crawlType string) ([]byte, []byte, error) {
+func Crawl(startingUrl string, r *http.Request, crawlType string, BL string, DL string) (
+	[]byte, []byte, error) {
 
 	pages := make(map[string]Page)
 	if crawlType == "B" {
-		pages = BreadthFirst(startingUrl, r)
+		breadthLimit, err := strconv.Atoi(BL)
+		if err != nil {
+			fmt.Errorf("could not parse limit: %s", BL)
+			return nil, nil, err
+		}
+		pages = BreadthFirst(startingUrl, r, breadthLimit)
 	} else if crawlType == "D" {
-		pages = DepthFirst(startingUrl, r)
+		depthLimit, err := strconv.Atoi(DL)
+		if err != nil {
+			fmt.Errorf("could not parse limit: %s", BL)
+			return nil, nil, err
+		}
+		pages = DepthFirst(startingUrl, r, depthLimit)
 	} else {
 		return nil, nil, fmt.Errorf("incorrect crawl type parameter: %s", crawlType)
 	}
@@ -337,7 +346,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	//fmt.Printf("%+v\n", crawl) // debug
 
 	// Populate crawl graph.
-	crawl_nodes, crawl_links, _ := Crawl(crawl.Url, r, crawl.Type)
+	crawl_nodes, crawl_links, _ := Crawl(crawl.Url, r, crawl.Type, crawl.BL, crawl.DL)
 	// fmt.Println("vertices:\n", (crawl_nodes), "\nedges:\n", (crawl_links))
 	json := Graph{Nodes: string(crawl_nodes), Links: string(crawl_links), Success: true, CrawlUrl: crawl.Url}
 	// Render graph.
