@@ -7,7 +7,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"golang.org/x/net/html"
@@ -32,8 +31,8 @@ type CrawlSettings struct {
 }
 
 type Graph struct {
-	Nodes    string
-	Links    string
+	Nodes    []Vertex
+	Links    []Edge
 	Success  bool
 	CrawlUrl string
 }
@@ -224,7 +223,7 @@ func DepthFirst(startingUrl string, r *http.Request, limit int) map[string]Page 
 }
 
 func Crawl(startingUrl string, r *http.Request, crawlType string, BL string, DL string) (
-	[]byte, []byte, error) {
+	[]Vertex, []Edge, error) {
 
 	pages := make(map[string]Page)
 	if crawlType == "B" {
@@ -263,15 +262,7 @@ func Crawl(startingUrl string, r *http.Request, crawlType string, BL string, DL 
 
 		Vertices = append(Vertices, *v)
 	}
-	//fmt.Println("Vertices: ", Vertices, "\nEdges: ", Edges)
-	vJson, err := json.Marshal(Vertices)
-	eJson, err2 := json.Marshal(Edges)
-	if err != nil && err2 != nil {
-		log.Printf("couldnt parse json: %v, %v", err, err2)
-		return nil, nil, err
-	}
-	//fmt.Println("Vertices: ", string(vJson), "\nEdges: ", string(eJson))
-	return vJson, eJson, nil
+	return Vertices, Edges, nil
 }
 
 // retrieveBody gets the html body at a url and return a slice of links in that body
@@ -348,7 +339,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// Populate crawl graph.
 	crawl_nodes, crawl_links, _ := Crawl(crawl.Url, r, crawl.Type, crawl.BL, crawl.DL)
 	// fmt.Println("vertices:\n", (crawl_nodes), "\nedges:\n", (crawl_links))
-	json := Graph{Nodes: string(crawl_nodes), Links: string(crawl_links), Success: true, CrawlUrl: crawl.Url}
+	json := Graph{Nodes: crawl_nodes, Links: crawl_links, Success: true, CrawlUrl: crawl.Url}
 	// Render graph.
 	tmpl.Execute(w, json)
 }
