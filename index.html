@@ -139,14 +139,14 @@
   </style>
 </head>
 
-<body class="text-center">
+<body class="">
   <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
     <header class="masthead mb-auto">
       <div class="inner">
         <h3><a href="/" class="masthead-brand">Go Crawler</a></h3>
         <nav class="nav nav-masthead justify-content-center">
-          <a class="nav-link active" href="#">Search</a>
-          <a class="nav-link" href="#">About</a>
+          <a class="nav-link active" href="/">Search</a>
+          <a class="nav-link" href="/about">About</a>
         </nav>
       </div>
     </header>
@@ -164,9 +164,9 @@
     <br>
     <br>
       {{else}}
-    <main role="main" class="inner cover">
-      <h1 class="cover-heading">Crawl a URL</h1>
-      <p class="lead">Enter a URL to begin crawling</p>
+    <main role="main" class="inner cover text-center">
+      <h1 class="cover-heading"><strong>Crawl a URL</strong></h1>
+      <p class="lead"><small>Fill the form to begin crawling</small></p>
       <p class="url"></p>
     </main>
     <br>
@@ -184,6 +184,18 @@
         padding: 25px;
         width: 75%;
         margin: 0 auto;
+
+      }
+      .crawlForm:hover {
+        box-shadow: 0px 0px 10px #553de0;
+      }
+      select:hover,
+      input:hover:not(.form-check-input) {
+        box-shadow: 0px 0px 10px #3de06e;
+      }
+      .masthead-brand:hover,
+      footer a:hover {
+        text-shadow: 0px 0px 10px #3de06e;
       }
     </style>
     
@@ -191,20 +203,19 @@
       <div class="form-row justify-content-center">
         <div class="form-group col-md-4">
           <label for="Url">Url</label>
-          <input class="form-control" Type="url" name="Url" id="Url">
+          <input class="form-control" Type="url" name="Url" id="Url" placeholder="https://www.example.com">
         </div>
         <div class="col-md-1" ></div>
         <div class="form-group col-md-2">
           <label for="Keyword">Keyword</label>
-          <input class="form-control" type="text" name="Keyword" id="Keyword">
+          <input class="form-control" type="text" name="Keyword" id="Keyword" placeholder="optional">
         </div>
       </div>
       <br>
       <div class="form-row justify-content-center">
-        <legend for="Type">Crawl Method</legend>
-        <div class="form-group col-md-4">
+        <div class="form-group col-md-6">
           <div class="row">
-            <input type="radio" name="Type" value="B" id="bfs" class="form-check-input">
+            <input type="radio" name="Type" value="B" id="bfs" class="form-check-input" checked>
             <label class="form-check-label" for="bfs"> Breadth-first</label>
             <div class="sub">
               <div>
@@ -231,13 +242,14 @@
         </div>
         <div class="button">
           <br />
+          <br />
           <input class="btn btn-secondary" type="submit">
         </div>
       </div>
     </form>
     
     {{end}}
-    <footer class="mastfoot mt-auto">
+    <footer class="mastfoot mt-auto text-center">
       <div class="inner">
         <p>Created by
           <a href="https://github.com/helenuria">Helen Stockman</a> |
