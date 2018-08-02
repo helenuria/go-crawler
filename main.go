@@ -344,9 +344,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	//fmt.Printf("%+v\n", crawl) // debug
 
 	// Cookies.
-	cookie := http.Cookie{Name: "urlHistory", Value: crawl.Url}
+	cookie := http.Cookie{Name: "urlHistory", Value: crawl.Url, Path: "/"}
 	http.SetCookie(w, &cookie)
-	cookie = http.Cookie{Name: "keywordHistory", Value: crawl.Keyword}
+	cookie = http.Cookie{Name: "keywordHistory", Value: crawl.Keyword, Path: "/"}
 	http.SetCookie(w, &cookie)
 
 	// Populate crawl graph.

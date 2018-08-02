@@ -165,6 +165,15 @@
     <a href="/" class="btn btn-lg btn-secondary searchbtn">Search Again</a>
     <br>
     <br>
+
+	<!-- Cookie testing -->
+          <script>
+            console.log('trace-graph');
+	    console.log(Cookies.get('keywordHistory'));
+            console.log(Cookies.get('urlHistory'));
+            console.log('trace-graph');
+          </script>
+
       {{else}}
     <main role="main" class="inner cover">
       <h1 class="cover-heading">Crawl a URL</h1>
@@ -195,17 +204,21 @@
           <label for="Url">Url</label>
           <!-- Cookie testing -->
           <script>
-            console.log('trace');
-            console.log(Cookies.get('urlHistory'))
-            console.log('trace');
+            console.log('trace-home');
+	    console.log(Cookies.get('keywordHistory'));
+            console.log(Cookies.get('urlHistory'));
+            console.log('trace-home');
           </script>
-          <input class="form-control" list="url-history" type="url" name="Url" id="Url">
+          <input class="form-control" type="url" name="Url" id="Url">
+	  <!--
+	  <input class="form-control" list="url-history" type="url" name="Url" id="Url">
           <datalist id="url-history">
             <option value="https://google.com">
             <option value=Cookies.get('urlHistory')>
             <option value="invalid url is not displayed">
             <option value="https://trace.com">
           </datalist>
+	  -->
         </div>
         <div class="col-md-1" ></div>
         <div class="form-group col-md-2">
@@ -248,6 +261,25 @@
           <input class="btn btn-secondary" type="submit">
         </div>
       </div>
+
+      <div>
+	  <!-- Cookie testing
+	  <label for="Url">Url</label>
+          <script>
+            console.log('trace');
+            console.log(Cookies.get('urlHistory'));
+            console.log('trace');
+          </script>
+          <input list="url-history" type="url" name="Url" id="Url">
+          <datalist id="url-history">
+            <option value="https://google.com">
+            <option value=Cookies.get('urlHistory')>
+            <option value="invalid url is not displayed">
+            <option value="https://trace.com">
+          </datalist>
+	  -->
+      </div>
+
     </form>
 
     {{end}}
