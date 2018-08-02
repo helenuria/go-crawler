@@ -68,10 +68,6 @@
       box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
     }
 
-    /*
-    * Header
-    */
-
     .masthead {
       margin-bottom: 2rem;
     }
@@ -114,11 +110,6 @@
       }
     }
 
-
-    /*
-    * Cover
-    */
-
     .cover {
       padding: 0 1.5rem;
     }
@@ -128,13 +119,22 @@
       font-weight: 700;
     }
 
-
-    /*
-    * Footer
-    */
-
     .mastfoot {
       color: rgba(255, 255, 255, .5);
+    }
+    .masthead-brand:hover,
+    footer a:hover {
+      text-shadow: 0px 0px 10px #3de06e;
+    }
+    
+    .submit {
+      border: 2px solid #3de06e;
+      background-color: transparent;
+      color: #3de06e;
+      padding: 8px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px 5px 5px 5px;
     }
   </style>
 </head>
@@ -151,7 +151,7 @@
       </div>
     </header>
     {{if .Success}}
-    <main role="main" class="inner cover">
+    <main role="main" class="inner cover text-center">
       <h1 class="cover-heading">{{.CrawlUrl}}</h1>
       <p class="lead">Click on the nodes to visit a page</p>
       <p class="url"></p>
@@ -159,7 +159,6 @@
     <div class="container-fluid">
       <svg width="960" height="600"></svg>
     </div>
-
     <a href="/" class="btn btn-lg btn-secondary searchbtn">Search Again</a>
     <br>
     <br>
@@ -193,57 +192,54 @@
       input:hover:not(.form-check-input) {
         box-shadow: 0px 0px 10px #3de06e;
       }
-      .masthead-brand:hover,
-      footer a:hover {
-        text-shadow: 0px 0px 10px #3de06e;
-      }
+
     </style>
     
     <form action="/crawl/" method="POST" class="crawlForm" id="crawlForm">
-      <div class="form-row justify-content-center">
-        <div class="form-group col-md-4">
+      <div class="form-row">
+        <div class="form-group col-md-4 offset-2">
           <label for="Url">Url</label>
-          <input class="form-control" Type="url" name="Url" id="Url" placeholder="https://www.example.com">
+          <input class="form-control" Type="url" name="Url" id="Url" placeholder="https://www.example.com" required>
         </div>
-        <div class="col-md-1" ></div>
-        <div class="form-group col-md-2">
+        <div class="form-group col-md-2 offset-2">
           <label for="Keyword">Keyword</label>
           <input class="form-control" type="text" name="Keyword" id="Keyword" placeholder="optional">
         </div>
       </div>
       <br>
-      <div class="form-row justify-content-center">
-        <div class="form-group col-md-6">
-          <div class="row">
-            <input type="radio" name="Type" value="B" id="bfs" class="form-check-input" checked>
-            <label class="form-check-label" for="bfs"> Breadth-first</label>
+      <div class="form-row">
+        <div class="form-group col-md-4 offset-2">
+          <p>Crawl Method</p>
+          <div class="form-check">
+            <input type="radio" name="Type" value="B" id="bfs" class="form-check-input">
+            <label class="form-check-label" for="bfs">Breadth-first</label>
             <div class="sub">
-              <div>
+              <div class="col-md-4 offset-6">
                 <label>Depth Limit:</label>
-                <!-- <input class="form-control" type="number" name="BL" min="1" max="3"> -->
                 <select id="depthBFS" class="form-control" name="BL">
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
                 </select>
               </div>
+
             </div>
           </div>
-          <div class="row">
+          <div class="form-check">
             <input type="radio" name="Type" value="D" id="dfs" class="form-check-input">
-            <label class="form-check-label" for="dfs"> Depth-first</label>
+            <label class="form-check-label" for="dfs">Depth-first</label>
             <div class="sub">
-              <div>
+              <div class="col-md-4 offset-6">
                 <label>Depth Limit:</label>
                 <input class="form-control" type="number" name="DL" min="1" max="50">
               </div>
             </div>
           </div>
         </div>
-        <div class="button">
+        <div class="form-group col-md-2 offset-2">
           <br />
           <br />
-          <input class="btn btn-secondary" type="submit">
+          <input class="btn btn-block submit" type="submit">
         </div>
       </div>
     </form>
