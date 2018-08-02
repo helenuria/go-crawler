@@ -156,9 +156,10 @@
       <p class="lead">Click on the nodes to visit a page</p>
       <p class="url"></p>
     </main>
-    <div class="container-fluid">
+    <div class="container-fluid text-center">
       <svg width="960" height="600"></svg>
     </div>
+    <br>
     <a href="/" class="btn btn-lg btn-secondary searchbtn">Search Again</a>
     <br>
     <br>
@@ -269,19 +270,18 @@
       return key.toLowerCase();
     }))
     console.log(nodes);
-
+    
+    var zoom = d3.zoom()
+        .scaleExtent([1 / 10, 2])
+        .on("zoom", zoomed);
     // set SVG element to size of height and width
-    const width = window.innerWidth * .9;
-    const height = window.innerHeight * .76;
+    const width = window.innerWidth * .95;
+    const height = window.innerHeight * .75;
+    const mid = width / 2;
     const svg = d3.select('svg')
       .attr('width', width)
       .attr('height', height)
-      .call(d3.zoom()
-        .scaleExtent([1 / 30, 10])
-        .on("zoom", zoomed)
-      );
-
-
+      .call(zoom)
     // edge simulation
     var linkForce = d3
       .forceLink()
@@ -319,13 +319,21 @@
         '_blank'
       );
     }
-
+    
+    // For d3 zooming
     function zoomed() {
       linkElements.attr("transform", d3.event.transform);
       nodeElements.attr("transform", d3.event.transform);
     }
-
-        
+    
+    // Position labels according to their position in the SVG
+    function repositionLabel(data) {
+      var urlLength = data.Url.length;
+      var nameOffset = (urlLength * 27.5);
+      var initialOffsetX = 15;
+      var offset = data.x < (mid) ? (-initialOffsetX * 2) - nameOffset : 0;
+      return initialOffsetX + offset;
+    }
     // styling for edges
     var linkElements = svg.append("g")
       .attr("class", "links")
@@ -356,7 +364,7 @@
     var textElements = nodeElements.append("text")
       .attr("dy", ".35em")
       .attr('fill', '#3dafe0')
-      .text(function (node) { return node.Url })
+      .text(node => node.Url)
       .attr("font-size", 60)
       .attr("font-family", "sans-serif")
 
@@ -366,8 +374,8 @@
         .attr('cx', node => node.x)
         .attr('cy', node => node.y)
       textElements
-        .attr('x', node => node.x + 30)
-        .attr('y', node => node.y)
+        .attr('y', node => node.y - 45)
+        .attr("x", node => node.x + repositionLabel(node))
       linkElements
         .attr('x1', link => link.source.x)
         .attr('y1', link => link.source.y)
@@ -377,7 +385,7 @@
     })
 
 
-    simulation.force("link").links(links).velocityDecay(1).alpha(1)
+    simulation.force("link").links(links);
   </script>
 
 
