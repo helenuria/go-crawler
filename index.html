@@ -176,7 +176,7 @@
       .sub {
         display: none;
       }
-    
+
       :checked~.sub {
         display: inline;
         margin-left: 40px;
@@ -188,12 +188,24 @@
         margin: 0 auto;
       }
     </style>
-    
+
     <form action="/crawl/" method="POST" class="crawlForm" id="crawlForm">
       <div class="form-row justify-content-center">
         <div class="form-group col-md-4">
           <label for="Url">Url</label>
-          <input class="form-control" Type="url" name="Url" id="Url">
+          <!-- Cookie testing -->
+          <script>
+            console.log('trace');
+            console.log(Cookies.get('urlHistory'))
+            console.log('trace');
+          </script>
+          <input class="form-control" list="url-history" type="url" name="Url" id="Url">
+          <datalist id="url-history">
+            <option value="https://google.com">
+            <option value=Cookies.get('urlHistory')>
+            <option value="invalid url is not displayed">
+            <option value="https://trace.com">
+          </datalist>
         </div>
         <div class="col-md-1" ></div>
         <div class="form-group col-md-2">
@@ -238,13 +250,6 @@
       </div>
     </form>
 
-    <!-- Testing Cookies -->
-    <script>
-	console.log('trace');
-	console.log(Cookies.get('urlHistory'));
-	console.log(Cookies.getJSON('urlHistory'));
-    </script>
-    
     {{end}}
     <footer class="mastfoot mt-auto">
       <div class="inner">
@@ -258,7 +263,7 @@
     </footer>
   </div>
 
-  
+
   <script>
     // These two maps are inefficient. Will need to refactored to the backend to be in the correct format.
     var nodes = ({{.Nodes }}).map((obj, idx) => {
@@ -326,7 +331,7 @@
       nodeElements.attr("transform", d3.event.transform);
     }
 
-        
+
     // styling for edges
     var linkElements = svg.append("g")
       .attr("class", "links")
@@ -352,7 +357,7 @@
         else
           return '#553de0';
       })
-    
+
     //styling for labels
     var textElements = nodeElements.append("text")
       .attr("dy", ".35em")
@@ -393,6 +398,3 @@
 
 
 </html>
-
-
-
