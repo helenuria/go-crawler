@@ -343,6 +343,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	// Crawl settings is now populated.
 	//fmt.Printf("%+v\n", crawl) // debug
 
+	// Cookies.
+	cookie := http.Cookie{Name: "urlHistory", Value: crawl.Url}
+	http.SetCookie(w, &cookie)
+	cookie = http.Cookie{Name: "keywordHistory", Value: crawl.Keyword}
+	http.SetCookie(w, &cookie)
+
 	// Populate crawl graph.
 	crawl_nodes, crawl_links, _ := Crawl(crawl.Url, r, crawl.Type, crawl.BL, crawl.DL)
 	// fmt.Println("vertices:\n", (crawl_nodes), "\nedges:\n", (crawl_links))
