@@ -210,7 +210,10 @@
         <div class="col-md-1" ></div>
         <div class="form-group col-md-2">
           <label for="Keyword">Keyword</label>
-          <input class="form-control" type="text" name="Keyword" id="Keyword">
+          <input class="form-control" list="keyword-history" type="text" name="Keyword" id="Keyword">
+	  <datalist id="keyword-history">
+	    <option id="keyword-cookie">
+	  </datalist>
         </div>
       </div>
       <br>
@@ -253,6 +256,7 @@
     <!-- Cookies -->
     <script>
       document.getElementById("url-cookie").value = Cookies.get('urlHistory');
+      document.getElementById("keyword-cookie").value = Cookies.get('keywordHistory');
     </script>
 
     {{end}}
