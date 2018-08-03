@@ -165,15 +165,6 @@
     <a href="/" class="btn btn-lg btn-secondary searchbtn">Search Again</a>
     <br>
     <br>
-
-	<!-- Cookie testing -->
-          <script>
-            console.log('trace-graph');
-	    console.log(Cookies.get('keywordHistory'));
-            console.log(Cookies.get('urlHistory'));
-            console.log('trace-graph');
-          </script>
-
       {{else}}
     <main role="main" class="inner cover">
       <h1 class="cover-heading">Crawl a URL</h1>
@@ -253,10 +244,23 @@
       </div>
     </form>
 
+    <!-- Clear cookies -->
+    <button id="clear-cookies" onclick="clearCookies()">Clear Cookies</button>
+
     <!-- Cookies -->
     <script>
+      // No need to check if undefined because dropdown only populates urls.
       document.getElementById("url-cookie").value = Cookies.get('urlHistory');
-      document.getElementById("keyword-cookie").value = Cookies.get('keywordHistory');
+      // Don't populate drop with 'undefined' text.
+      if (typeof Cookies.get('keywordHistory') !== 'undefined') {  
+	      document.getElementById("keyword-cookie").value = Cookies.get('keywordHistory');
+      }
+      function clearCookies() {
+	      Cookies.remove('urlHistory');
+	      Cookies.remove('keywordHistory');
+	      document.getElementById("clear-cookies").innerHTML = "Cleared! Refreshing Page...";
+	      location.reload();
+      }
     </script>
 
     {{end}}
