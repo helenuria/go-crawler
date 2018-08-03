@@ -5,6 +5,8 @@
   <title>D3 Demo</title>
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
     crossorigin="anonymous">
   <style>
@@ -174,7 +176,7 @@
       .sub {
         display: none;
       }
-    
+
       :checked~.sub {
         display: inline;
         margin-left: 40px;
@@ -195,16 +197,22 @@
       }
 
     </style>
-    
+
     <form action="/crawl/" method="POST" class="crawlForm" id="crawlForm">
       <div class="form-row">
         <div class="form-group col-md-4 offset-2">
           <label for="Url">Url</label>
-          <input class="form-control" Type="url" name="Url" id="Url" placeholder="https://www.example.com" required>
+	  <input class="form-control" list="url-history" type="url" name="Url" id="Url" placeholder="https://www.example.com" required>
+          <datalist id="url-history">
+	    <option id="url-cookie">
+          </datalist>
         </div>
         <div class="form-group col-md-2 offset-2">
           <label for="Keyword">Keyword</label>
-          <input class="form-control" type="text" name="Keyword" id="Keyword" placeholder="optional">
+          <input class="form-control" list="keyword-history" type="text" name="Keyword" id="Keyword" placeholder="optional">
+	  <datalist id="keyword-history">
+	    <option id="keyword-cookie">
+	  </datalist>
         </div>
       </div>
       <br>
@@ -244,7 +252,26 @@
         </div>
       </div>
     </form>
-    
+
+    <!-- Clear cookies -->
+    <button id="clear-cookies" onclick="clearCookies()">Clear Cookies</button>
+
+    <!-- Cookies -->
+    <script>
+      // No need to check if undefined because dropdown only populates urls.
+      document.getElementById("url-cookie").value = Cookies.get('urlHistory');
+      // Don't populate dropdown with 'undefined' text.
+      if (typeof Cookies.get('keywordHistory') !== 'undefined') {  
+	      document.getElementById("keyword-cookie").value = Cookies.get('keywordHistory');
+      }
+      function clearCookies() {
+	      Cookies.remove('urlHistory');
+	      Cookies.remove('keywordHistory');
+	      document.getElementById("clear-cookies").innerHTML = "Cleared! Refreshing Page...";
+	      location.reload();
+      }
+    </script>
+
     {{end}}
     <footer class="mastfoot mt-auto text-center">
       <div class="inner">
@@ -258,7 +285,7 @@
     </footer>
   </div>
 
-  
+
   <script>
     // These two maps are inefficient. Will need to refactored to the backend to be in the correct format.
     var nodes = ({{.Nodes }}).map((obj, idx) => {
@@ -325,7 +352,7 @@
       linkElements.attr("transform", d3.event.transform);
       nodeElements.attr("transform", d3.event.transform);
     }
-    
+
     // Position labels according to their position in the SVG
     function repositionLabel(data) {
       var urlLength = data.Url.length;
@@ -334,6 +361,7 @@
       var offset = data.x < (mid) ? (-initialOffsetX * 2) - nameOffset : 0;
       return initialOffsetX + offset;
     }
+
     // styling for edges
     var linkElements = svg.append("g")
       .attr("class", "links")
@@ -359,7 +387,7 @@
         else
           return '#553de0';
       })
-    
+
     //styling for labels
     var textElements = nodeElements.append("text")
       .attr("dy", ".35em")
@@ -400,6 +428,3 @@
 
 
 </html>
-
-
-
