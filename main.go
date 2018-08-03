@@ -3,7 +3,6 @@
 // It gets the crawl settings by form,
 // crawls, and graphs the crawl with D3.js.
 // TODO build keywordHighlight feature
-// TODO add past starting urls using cookies/sessions
 package main
 
 import (
