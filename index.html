@@ -10,29 +10,25 @@
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
     crossorigin="anonymous">
   <style>
+    /* SVG styling */
     circle+text {
       display: none;
     }
-
     circle:hover {
       fill: #3dafe0;
     }
-
     circle:hover+text {
       display: inline;
       position: absolute;
     }
-
     text {
       text-shadow: 1px 0 0 #fff, -1px 0 0 #fff, 0 1px 0 #fff, 0 -1px 0 #fff, 0.5px 0.5px #fff, -0.5px -0.5px 0 #fff, 0.5px -0.5px 0 #fff, -0.5px 0.5px 0 #fff;
       position: relative;
     }
-
     circle {
       position: relative;
       z-index: 1;
     }
-
     a,
     a:focus,
     a:hover {
@@ -40,7 +36,6 @@
     }
 
     /* Custom default button */
-
     .btn-secondary,
     .btn-secondary:hover,
     .btn-secondary:focus {
@@ -55,7 +50,7 @@
       background-color: #454545;
       color: #fff;
     }
-
+    /* Bootstrap template */
     html,
     body {
       height: 100%;
@@ -128,7 +123,7 @@
     footer a:hover {
       text-shadow: 0px 0px 10px #3de06e;
     }
-    
+    /* Custom Submit Button */
     .submit {
       border: 2px solid #3de06e;
       background-color: transparent;
@@ -143,6 +138,7 @@
 
 <body class="">
   <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+    <!-- Navbar -->
     <header class="masthead mb-auto">
       <div class="inner">
         <h3><a href="/" class="masthead-brand">Go Crawler</a></h3>
@@ -156,8 +152,8 @@
     <main role="main" class="inner cover text-center">
       <h1 class="cover-heading">{{.CrawlUrl}}</h1>
       <p class="lead">Click on the nodes to visit a page</p>
-      <p class="url"></p>
     </main>
+    <!-- D3 rendering -->
     <div class="container-fluid text-center">
       <svg width="960" height="600"></svg>
     </div>
@@ -165,6 +161,134 @@
     <a href="/" class="btn btn-lg btn-secondary searchbtn">Search Again</a>
     <br>
     <br>
+    <script>
+      // These two maps are inefficient. Will need to refactored to the backend to be in the correct format.
+      var nodes = ({{.Nodes }}).map((obj, idx) => {
+        obj.id = idx;
+        return obj;
+      })
+      // can be refactored on the backend by specifying `json:"target"` and `json:"source"`
+      var links = ({{.Links }}).map(obj => _.mapKeys(obj, (value, key) => {
+        return key.toLowerCase();
+      }))
+      console.log(nodes);
+
+      var zoom = d3.zoom()
+        .scaleExtent([1 / 10, 2])
+        .on("zoom", zoomed);
+      // set SVG element to size of height and width
+      const width = window.innerWidth * .95;
+      const height = window.innerHeight * .75;
+      const mid = width / 2;
+      const svg = d3.select('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .call(zoom)
+      // edge simulation
+      var linkForce = d3
+        .forceLink()
+        .id(link => link.id)
+        .strength((link) => .4)
+        .distance(d => 100)
+
+      // node simulation
+      var simulation = d3
+        .forceSimulation()
+        .force('link', linkForce)
+        .force('charge', d3.forceManyBody().strength(-500))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+
+      // drag and drop to play with graph
+      var dragDrop = d3.drag().on('start', (node) => {
+        node.fx = node.x
+        node.fy = node.y
+      }).on('drag', (node) => {
+        simulation.alphaTarget(0.7).restart()
+        node.fx = d3.event.x
+        node.fy = d3.event.y
+      }).on('end', (node) => {
+        if (!d3.event.active) {
+          simulation.alphaTarget(0)
+        }
+        node.fx = null
+        node.fy = null
+      })
+
+      // used to open URL
+      function openTab(selectedNode) {
+        window.open(
+          selectedNode.Url,
+          '_blank'
+        );
+      }
+
+      // For d3 zooming
+      function zoomed() {
+        linkElements.attr("transform", d3.event.transform);
+        nodeElements.attr("transform", d3.event.transform);
+      }
+
+      // Position labels according to their position in the SVG
+      function repositionLabel(data) {
+        var urlLength = data.Url.length;
+        var nameOffset = (urlLength * 27.5);
+        var initialOffsetX = 15;
+        var offset = data.x < (mid) ? (-initialOffsetX * 2) - nameOffset : 0;
+        return initialOffsetX + offset;
+      }
+
+      // styling for edges
+      var linkElements = svg.append("g")
+        .attr("class", "links")
+        .selectAll("line")
+        .data(links)
+        .enter().append("line")
+        .attr("stroke-width", 1)
+        .attr("stroke", "#3de06e")
+
+
+      // styling for vertices
+      var nodeElements = svg.selectAll("foo")
+        .data(nodes)
+        .enter().append("g")
+
+      var circles = nodeElements.append("circle")
+        .attr("r", 15)
+        .call(dragDrop)
+        .on('click', openTab) // open tab by clicking on vertices
+        .attr('fill', (data) => {
+          if (data.KeywordHighlight)
+            return '#fff960';
+          else
+            return '#553de0';
+        })
+
+      //styling for labels
+      var textElements = nodeElements.append("text")
+        .attr("dy", ".35em")
+        .attr('fill', '#3dafe0')
+        .text(node => node.Url)
+        .attr("font-size", 60)
+        .attr("font-family", "sans-serif")
+
+
+      simulation.nodes(nodes).on('tick', () => {
+        circles
+          .attr('cx', node => node.x)
+          .attr('cy', node => node.y)
+        textElements
+          .attr('y', node => node.y - 45)
+          .attr("x", node => node.x + repositionLabel(node))
+        linkElements
+          .attr('x1', link => link.source.x)
+          .attr('y1', link => link.source.y)
+          .attr('x2', link => link.target.x)
+          .attr('y2', link => link.target.y)
+      })
+      simulation.force("link").links(links);
+
+    </script>
+
       {{else}}
     <main role="main" class="inner cover text-center">
       <h1 class="cover-heading"><strong>Crawl a URL</strong></h1>
@@ -188,7 +312,8 @@
         margin: 0 auto;
 
       }
-      .crawlForm:hover {
+      .crawlForm:hover,
+      #clear-cookies:hover {
         box-shadow: 0px 0px 10px #553de0;
       }
       select:hover,
@@ -196,29 +321,48 @@
         box-shadow: 0px 0px 10px #3de06e;
       }
 
-    </style>
+      #clear-cookies {
+        padding: 0px;
+        font-size: 10px;
+        border: 2px solid #9885ff;
+        background-color: transparent;
+        color: #9885ff;
+        padding: 2px 10px;
+        cursor: pointer;
+        border-radius: 5px 5px 5px 5px;
+      }
 
+    </style>
+    <!-- Search Form -->
     <form action="/crawl/" method="POST" class="crawlForm" id="crawlForm">
+      <!-- URL and keyword -->
       <div class="form-row">
         <div class="form-group col-md-4 offset-2">
           <label for="Url">Url</label>
-	  <input class="form-control" list="url-history" type="url" name="Url" id="Url" placeholder="https://www.example.com" required>
+          <input class="form-control" list="url-history" type="url" name="Url" id="Url" placeholder="https://www.example.com" required>
+          <!-- Cookies populated list -->
           <datalist id="url-history">
-	    <option id="url-cookie">
+	          <option id="url-cookie">
           </datalist>
         </div>
         <div class="form-group col-md-2 offset-2">
           <label for="Keyword">Keyword</label>
           <input class="form-control" list="keyword-history" type="text" name="Keyword" id="Keyword" placeholder="optional">
-	  <datalist id="keyword-history">
-	    <option id="keyword-cookie">
-	  </datalist>
+          <!-- Cookies populated list -->
+          <datalist id="keyword-history">
+            <option id="keyword-cookie">
+          </datalist>
         </div>
       </div>
-      <br>
+      <!-- Crawl method -->
       <div class="form-row">
         <div class="form-group col-md-4 offset-2">
+          <!-- Clear cookies -->
+          <a id="clear-cookies" onclick="clearCookies()" class="btn">Clear Search History</a>
+          <br>
+          <br>
           <p>Crawl Method</p>
+          <!-- BFS -->
           <div class="form-check">
             <input type="radio" name="Type" value="B" id="bfs" class="form-check-input">
             <label class="form-check-label" for="bfs">Breadth-first</label>
@@ -231,9 +375,9 @@
                   <option value="3">3</option>
                 </select>
               </div>
-
             </div>
           </div>
+          <!-- DFS -->
           <div class="form-check">
             <input type="radio" name="Type" value="D" id="dfs" class="form-check-input">
             <label class="form-check-label" for="dfs">Depth-first</label>
@@ -245,6 +389,7 @@
             </div>
           </div>
         </div>
+        <!-- Submit button -->
         <div class="form-group col-md-2 offset-2">
           <br />
           <br />
@@ -253,22 +398,23 @@
       </div>
     </form>
 
-    <!-- Clear cookies -->
-    <button id="clear-cookies" onclick="clearCookies()">Clear Cookies</button>
-
     <!-- Cookies -->
     <script>
       // No need to check if undefined because dropdown only populates urls.
       document.getElementById("url-cookie").value = Cookies.get('urlHistory');
+      console.log(Cookies.get('urlHistory'));
       // Don't populate dropdown with 'undefined' text.
       if (typeof Cookies.get('keywordHistory') !== 'undefined') {  
 	      document.getElementById("keyword-cookie").value = Cookies.get('keywordHistory');
+        console.log(Cookies.get('keywordHistory'));
       }
       function clearCookies() {
 	      Cookies.remove('urlHistory');
 	      Cookies.remove('keywordHistory');
-	      document.getElementById("clear-cookies").innerHTML = "Cleared! Refreshing Page...";
-	      location.reload();
+	      document.getElementById("clear-cookies").innerHTML = "History Cleared...";
+        setTimeout(() => {
+          location.reload();
+        }, 400);
       }
     </script>
 
@@ -284,137 +430,7 @@
       </div>
     </footer>
   </div>
-
-
-  <script>
-    // These two maps are inefficient. Will need to refactored to the backend to be in the correct format.
-    var nodes = ({{.Nodes }}).map((obj, idx) => {
-      obj.id = idx;
-      return obj;
-    })
-    // can be refactored on the backend by specifying `json:"target"` and `json:"source"`
-    var links = ({{.Links }}).map(obj => _.mapKeys(obj, (value, key) => {
-      return key.toLowerCase();
-    }))
-    console.log(nodes);
-    
-    var zoom = d3.zoom()
-        .scaleExtent([1 / 10, 2])
-        .on("zoom", zoomed);
-    // set SVG element to size of height and width
-    const width = window.innerWidth * .95;
-    const height = window.innerHeight * .75;
-    const mid = width / 2;
-    const svg = d3.select('svg')
-      .attr('width', width)
-      .attr('height', height)
-      .call(zoom)
-    // edge simulation
-    var linkForce = d3
-      .forceLink()
-      .id(link => link.id)
-      .strength((link) => .4)
-      .distance(d => 100)
-
-    // node simulation
-    var simulation = d3
-      .forceSimulation()
-      .force('link', linkForce)
-      .force('charge', d3.forceManyBody().strength(-500))
-      .force('center', d3.forceCenter(width / 2, height / 2))
-
-    // drag and drop to play with graph
-    var dragDrop = d3.drag().on('start', (node) => {
-      node.fx = node.x
-      node.fy = node.y
-    }).on('drag', (node) => {
-      simulation.alphaTarget(0.7).restart()
-      node.fx = d3.event.x
-      node.fy = d3.event.y
-    }).on('end', (node) => {
-      if (!d3.event.active) {
-        simulation.alphaTarget(0)
-      }
-      node.fx = null
-      node.fy = null
-    })
-
-    // used to open URL
-    function openTab(selectedNode) {
-      window.open(
-        selectedNode.Url,
-        '_blank'
-      );
-    }
-    
-    // For d3 zooming
-    function zoomed() {
-      linkElements.attr("transform", d3.event.transform);
-      nodeElements.attr("transform", d3.event.transform);
-    }
-
-    // Position labels according to their position in the SVG
-    function repositionLabel(data) {
-      var urlLength = data.Url.length;
-      var nameOffset = (urlLength * 27.5);
-      var initialOffsetX = 15;
-      var offset = data.x < (mid) ? (-initialOffsetX * 2) - nameOffset : 0;
-      return initialOffsetX + offset;
-    }
-
-    // styling for edges
-    var linkElements = svg.append("g")
-      .attr("class", "links")
-      .selectAll("line")
-      .data(links)
-      .enter().append("line")
-        .attr("stroke-width", 1)
-        .attr("stroke", "#3de06e")
-
-
-    // styling for vertices
-    var nodeElements = svg.selectAll("foo")
-      .data(nodes)
-        .enter().append("g")
-
-    var circles = nodeElements.append("circle")
-      .attr("r", 15)
-      .call(dragDrop)
-      .on('click', openTab) // open tab by clicking on vertices
-      .attr('fill', (data) => {
-        if (data.KeywordHighlight)
-          return '#fff960';
-        else
-          return '#553de0';
-      })
-
-    //styling for labels
-    var textElements = nodeElements.append("text")
-      .attr("dy", ".35em")
-      .attr('fill', '#3dafe0')
-      .text(node => node.Url)
-      .attr("font-size", 60)
-      .attr("font-family", "sans-serif")
-
-
-    simulation.nodes(nodes).on('tick', () => {
-      circles
-        .attr('cx', node => node.x)
-        .attr('cy', node => node.y)
-      textElements
-        .attr('y', node => node.y - 45)
-        .attr("x", node => node.x + repositionLabel(node))
-      linkElements
-        .attr('x1', link => link.source.x)
-        .attr('y1', link => link.source.y)
-        .attr('x2', link => link.target.x)
-        .attr('y2', link => link.target.y)
-
-    })
-
-
-    simulation.force("link").links(links);
-  </script>
+  
 
 
 
