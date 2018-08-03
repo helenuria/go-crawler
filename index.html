@@ -70,10 +70,6 @@
       box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
     }
 
-    /*
-    * Header
-    */
-
     .masthead {
       margin-bottom: 2rem;
     }
@@ -116,11 +112,6 @@
       }
     }
 
-
-    /*
-    * Cover
-    */
-
     .cover {
       padding: 0 1.5rem;
     }
@@ -130,45 +121,54 @@
       font-weight: 700;
     }
 
-
-    /*
-    * Footer
-    */
-
     .mastfoot {
       color: rgba(255, 255, 255, .5);
+    }
+    .masthead-brand:hover,
+    footer a:hover {
+      text-shadow: 0px 0px 10px #3de06e;
+    }
+    
+    .submit {
+      border: 2px solid #3de06e;
+      background-color: transparent;
+      color: #3de06e;
+      padding: 8px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px 5px 5px 5px;
     }
   </style>
 </head>
 
-<body class="text-center">
+<body class="">
   <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
     <header class="masthead mb-auto">
       <div class="inner">
         <h3><a href="/" class="masthead-brand">Go Crawler</a></h3>
         <nav class="nav nav-masthead justify-content-center">
-          <a class="nav-link active" href="#">Search</a>
-          <a class="nav-link" href="#">About</a>
+          <a class="nav-link active" href="/">Search</a>
+          <a class="nav-link" href="/about">About</a>
         </nav>
       </div>
     </header>
     {{if .Success}}
-    <main role="main" class="inner cover">
+    <main role="main" class="inner cover text-center">
       <h1 class="cover-heading">{{.CrawlUrl}}</h1>
       <p class="lead">Click on the nodes to visit a page</p>
       <p class="url"></p>
     </main>
-    <div class="container-fluid">
+    <div class="container-fluid text-center">
       <svg width="960" height="600"></svg>
     </div>
-
+    <br>
     <a href="/" class="btn btn-lg btn-secondary searchbtn">Search Again</a>
     <br>
     <br>
       {{else}}
-    <main role="main" class="inner cover">
-      <h1 class="cover-heading">Crawl a URL</h1>
-      <p class="lead">Enter a URL to begin crawling</p>
+    <main role="main" class="inner cover text-center">
+      <h1 class="cover-heading"><strong>Crawl a URL</strong></h1>
+      <p class="lead"><small>Fill the form to begin crawling</small></p>
       <p class="url"></p>
     </main>
     <br>
@@ -186,60 +186,69 @@
         padding: 25px;
         width: 75%;
         margin: 0 auto;
+
       }
+      .crawlForm:hover {
+        box-shadow: 0px 0px 10px #553de0;
+      }
+      select:hover,
+      input:hover:not(.form-check-input) {
+        box-shadow: 0px 0px 10px #3de06e;
+      }
+
     </style>
 
     <form action="/crawl/" method="POST" class="crawlForm" id="crawlForm">
-      <div class="form-row justify-content-center">
-        <div class="form-group col-md-4">
+      <div class="form-row">
+        <div class="form-group col-md-4 offset-2">
           <label for="Url">Url</label>
-	  <input class="form-control" list="url-history" type="url" name="Url" id="Url">
+	  <input class="form-control" list="url-history" type="url" name="Url" id="Url" placeholder="https://www.example.com" required>
           <datalist id="url-history">
 	    <option id="url-cookie">
           </datalist>
         </div>
-        <div class="col-md-1" ></div>
-        <div class="form-group col-md-2">
+        <div class="form-group col-md-2 offset-2">
           <label for="Keyword">Keyword</label>
-          <input class="form-control" list="keyword-history" type="text" name="Keyword" id="Keyword">
+          <input class="form-control" list="keyword-history" type="text" name="Keyword" id="Keyword" placeholder="optional">
 	  <datalist id="keyword-history">
 	    <option id="keyword-cookie">
 	  </datalist>
         </div>
       </div>
       <br>
-      <div class="form-row justify-content-center">
-        <legend for="Type">Crawl Method</legend>
-        <div class="form-group col-md-4">
-          <div class="row">
+      <div class="form-row">
+        <div class="form-group col-md-4 offset-2">
+          <p>Crawl Method</p>
+          <div class="form-check">
             <input type="radio" name="Type" value="B" id="bfs" class="form-check-input">
-            <label class="form-check-label" for="bfs"> Breadth-first</label>
+            <label class="form-check-label" for="bfs">Breadth-first</label>
             <div class="sub">
-              <div>
+              <div class="col-md-4 offset-6">
                 <label>Depth Limit:</label>
-                <!-- <input class="form-control" type="number" name="BL" min="1" max="3"> -->
                 <select id="depthBFS" class="form-control" name="BL">
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
                 </select>
               </div>
+
             </div>
           </div>
-          <div class="row">
+          <div class="form-check">
             <input type="radio" name="Type" value="D" id="dfs" class="form-check-input">
-            <label class="form-check-label" for="dfs"> Depth-first</label>
+            <label class="form-check-label" for="dfs">Depth-first</label>
             <div class="sub">
-              <div>
+              <div class="col-md-4 offset-6">
                 <label>Depth Limit:</label>
                 <input class="form-control" type="number" name="DL" min="1" max="50">
               </div>
             </div>
           </div>
         </div>
-        <div class="button">
+        <div class="form-group col-md-2 offset-2">
           <br />
-          <input class="btn btn-secondary" type="submit">
+          <br />
+          <input class="btn btn-block submit" type="submit">
         </div>
       </div>
     </form>
@@ -251,7 +260,7 @@
     <script>
       // No need to check if undefined because dropdown only populates urls.
       document.getElementById("url-cookie").value = Cookies.get('urlHistory');
-      // Don't populate drop with 'undefined' text.
+      // Don't populate dropdown with 'undefined' text.
       if (typeof Cookies.get('keywordHistory') !== 'undefined') {  
 	      document.getElementById("keyword-cookie").value = Cookies.get('keywordHistory');
       }
@@ -264,7 +273,7 @@
     </script>
 
     {{end}}
-    <footer class="mastfoot mt-auto">
+    <footer class="mastfoot mt-auto text-center">
       <div class="inner">
         <p>Created by
           <a href="https://github.com/helenuria">Helen Stockman</a> |
@@ -288,19 +297,18 @@
       return key.toLowerCase();
     }))
     console.log(nodes);
-
+    
+    var zoom = d3.zoom()
+        .scaleExtent([1 / 10, 2])
+        .on("zoom", zoomed);
     // set SVG element to size of height and width
-    const width = window.innerWidth * .9;
-    const height = window.innerHeight * .76;
+    const width = window.innerWidth * .95;
+    const height = window.innerHeight * .75;
+    const mid = width / 2;
     const svg = d3.select('svg')
       .attr('width', width)
       .attr('height', height)
-      .call(d3.zoom()
-        .scaleExtent([1 / 30, 10])
-        .on("zoom", zoomed)
-      );
-
-
+      .call(zoom)
     // edge simulation
     var linkForce = d3
       .forceLink()
@@ -338,12 +346,21 @@
         '_blank'
       );
     }
-
+    
+    // For d3 zooming
     function zoomed() {
       linkElements.attr("transform", d3.event.transform);
       nodeElements.attr("transform", d3.event.transform);
     }
 
+    // Position labels according to their position in the SVG
+    function repositionLabel(data) {
+      var urlLength = data.Url.length;
+      var nameOffset = (urlLength * 27.5);
+      var initialOffsetX = 15;
+      var offset = data.x < (mid) ? (-initialOffsetX * 2) - nameOffset : 0;
+      return initialOffsetX + offset;
+    }
 
     // styling for edges
     var linkElements = svg.append("g")
@@ -375,7 +392,7 @@
     var textElements = nodeElements.append("text")
       .attr("dy", ".35em")
       .attr('fill', '#3dafe0')
-      .text(function (node) { return node.Url })
+      .text(node => node.Url)
       .attr("font-size", 60)
       .attr("font-family", "sans-serif")
 
@@ -385,8 +402,8 @@
         .attr('cx', node => node.x)
         .attr('cy', node => node.y)
       textElements
-        .attr('x', node => node.x + 30)
-        .attr('y', node => node.y)
+        .attr('y', node => node.y - 45)
+        .attr("x", node => node.x + repositionLabel(node))
       linkElements
         .attr('x1', link => link.source.x)
         .attr('y1', link => link.source.y)
@@ -396,7 +413,7 @@
     })
 
 
-    simulation.force("link").links(links).velocityDecay(1).alpha(1)
+    simulation.force("link").links(links);
   </script>
 
 
