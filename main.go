@@ -15,7 +15,6 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
-	"strings"
 	"strconv"
 	"time"
 
@@ -345,27 +344,22 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	//fmt.Printf("%+v\n", crawl)
 
 	// Cookies. If already set, append value.
-	var b strings.Builder
-	if cookieUrl, err := r.Cookie("urlHistory"); err != nil {
+	if c, err := r.Cookie("urlHistory"); err != nil {
 		// Append url.
-		b.WriteString(cookieUrl.Value)
-		b.WriteString(" : ")
-		b.WriteString(crawl.Url)
-		c := http.Cookie{Name: "urlHistory", Value: b.String(), Path: "/"}
+		v := fmt.Sprintf("%s%s%s", c.Value, " : ", crawl.Url)
+		c := http.Cookie{Name: "urlHistory", Value: v, Path: "/"}
 		http.SetCookie(w, &c)
 	} else {
 		c := http.Cookie{Name: "urlHistory", Value: crawl.Url, Path: "/"}
 		http.SetCookie(w, &c)
 	}
-	if cookieKeyword, err := r.Cookie("keywordHistory"); err != nil {
+	if c, err := r.Cookie("keywordHistory"); err != nil {
 		// Append keyword.
-		b.WriteString(cookieKeyword.Value)
-		b.WriteString(" : ")
-		b.WriteString(crawl.Url)
-		c := http.Cookie{Name: "keywordHistory", Value: b.String(), Path: "/"}
+		v := fmt.Sprintf("%s%s%s", c.Value, " : ", crawl.Keyword)
+		c := http.Cookie{Name: "keywordHistory", Value: v, Path: "/"}
 		http.SetCookie(w, &c)
 	} else {
-		c := http.Cookie{Name: "urlHistory", Value: crawl.Url, Path: "/"}
+		c := http.Cookie{Name: "keywordHistory", Value: crawl.Keyword, Path: "/"}
 		http.SetCookie(w, &c)
 	}
 
