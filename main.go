@@ -325,14 +325,26 @@ func retrieveBody(pageUrl string, r *http.Request) ([]string, error) {
 }
 
 // Save url and keyword history with cookies. 
+//TODO do not add duplicate values. 
 func bake(crawl *CrawlSettings, w http.ResponseWriter, r *http.Request) (err error) {
-	// Query cookies
-	cookie := http.Cookie{Name: "urlHistory", Value: crawl.Url, Path: "/"}
-	http.SetCookie(w, &cookie)
-	cookie = http.Cookie{Name: "urlHistory", Value: "trace.com", Path: "/"}
-	r.AddCookie(&cookie)
-	cookie = http.Cookie{Name: "keywordHistory", Value: crawl.Keyword, Path: "/"}
-	http.SetCookie(w, &cookie)
+	if _, err := r.Cookie("urlHistory"); err != nil {
+		c := http.Cookie{Name: "urlHistory", Value: crawl.Url, Path: "/"}
+		http.SetCookie(w, &c)
+	} else {
+		c1, _ := r.Cookie("urlHistory")
+		v := fmt.Sprintf("%s%s%s", c1.Value, " : ", crawl.Url)
+		c2 := http.Cookie{Name: "urlHistory", Value: v, Path: "/"}
+		http.SetCookie(w, &c2)
+	}
+	if _, err := r.Cookie("keywordHistory"); err != nil {
+		c := http.Cookie{Name: "keywordHistory", Value: crawl.Keyword, Path: "/"}
+		http.SetCookie(w, &c)
+	} else {
+		c1, _ := r.Cookie("keywordHistory")
+		v := fmt.Sprintf("%s%s%s", c1.Value, " : ", crawl.Keyword)
+		c2 := http.Cookie{Name: "keywordHistory", Value: v, Path: "/"}
+		http.SetCookie(w, &c2)
+	}
 	return nil
 }
 
