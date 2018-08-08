@@ -324,6 +324,15 @@ func retrieveBody(pageUrl string, r *http.Request) ([]string, error) {
 	return foundUrl, err
 }
 
+// Save url and keyword history with cookies. 
+func bake(crawl *CrawlSettings, w http.ResponseWriter) (err error) {
+	cookie := http.Cookie{Name: "urlHistory", Value: crawl.Url, Path: "/"}
+	http.SetCookie(w, &cookie)
+	cookie = http.Cookie{Name: "keywordHistory", Value: crawl.Keyword, Path: "/"}
+	http.SetCookie(w, &cookie)
+	return nil
+}
+
 // Responds to an HTTP request.
 func handler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("index.html"))
@@ -342,32 +351,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	//fmt.Printf("%+v\n", crawl)
 
-	// Cookies. If already set, append value.
-	if c, err := r.Cookie("urlHistory"); err != nil {
-		// Append url.
-		v := fmt.Sprintf("%s%s%s", c.Value, " : ", crawl.Url)
-		c := http.Cookie{Name: "urlHistory", Value: v, Path: "/"}
-		http.SetCookie(w, &c)
-	} else {
-		c := http.Cookie{Name: "urlHistory", Value: crawl.Url, Path: "/"}
-		http.SetCookie(w, &c)
+	if err := bake(&crawl, w); err != nil {
+		fmt.Println(err)
 	}
-	if c, err := r.Cookie("keywordHistory"); err != nil {
-		// Append keyword.
-		v := fmt.Sprintf("%s%s%s", c.Value, " : ", crawl.Keyword)
-		c := http.Cookie{Name: "keywordHistory", Value: v, Path: "/"}
-		http.SetCookie(w, &c)
-	} else {
-		c := http.Cookie{Name: "keywordHistory", Value: crawl.Keyword, Path: "/"}
-		http.SetCookie(w, &c)
-	}
-
-	/*
-	cookie := http.Cookie{Name: "urlHistory", Value: crawl.Url, Path: "/"}
-	http.SetCookie(w, &cookie)
-	cookie = http.Cookie{Name: "keywordHistory", Value: crawl.Keyword, Path: "/"}
-	http.SetCookie(w, &cookie)
-	*/
 
 	// Populate crawl graph.
 	crawl_nodes, crawl_links, _ := Crawl(crawl.Url, r, crawl.Type, crawl.BL, crawl.DL)
