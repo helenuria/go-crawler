@@ -325,9 +325,12 @@ func retrieveBody(pageUrl string, r *http.Request) ([]string, error) {
 }
 
 // Save url and keyword history with cookies. 
-func bake(crawl *CrawlSettings, w http.ResponseWriter) (err error) {
+func bake(crawl *CrawlSettings, w http.ResponseWriter, r *http.Request) (err error) {
+	// Query cookies
 	cookie := http.Cookie{Name: "urlHistory", Value: crawl.Url, Path: "/"}
 	http.SetCookie(w, &cookie)
+	cookie = http.Cookie{Name: "urlHistory", Value: "trace.com", Path: "/"}
+	r.AddCookie(&cookie)
 	cookie = http.Cookie{Name: "keywordHistory", Value: crawl.Keyword, Path: "/"}
 	http.SetCookie(w, &cookie)
 	return nil
@@ -351,7 +354,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	//fmt.Printf("%+v\n", crawl)
 
-	if err := bake(&crawl, w); err != nil {
+	if err := bake(&crawl, w, r); err != nil {
 		fmt.Println(err)
 	}
 
