@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"google.golang.org/appengine"
@@ -325,14 +326,15 @@ func retrieveBody(pageUrl string, r *http.Request) ([]string, error) {
 }
 
 // Save url and keyword history with cookies. 
-//TODO do not add duplicate values. 
 func bake(crawl *CrawlSettings, w http.ResponseWriter, r *http.Request) (err error) {
+	var sep string = " : "
 	if _, err := r.Cookie("urlHistory"); err != nil {
 		c := http.Cookie{Name: "urlHistory", Value: crawl.Url, Path: "/"}
 		http.SetCookie(w, &c)
 	} else {
 		c1, _ := r.Cookie("urlHistory")
-		v := fmt.Sprintf("%s%s%s", c1.Value, " : ", crawl.Url)
+		v := fmt.Sprintf("%s%s%s", c1.Value, sep, crawl.Url)
+		_ = trimDuplicates(&v, sep)
 		c2 := http.Cookie{Name: "urlHistory", Value: v, Path: "/"}
 		http.SetCookie(w, &c2)
 	}
@@ -341,10 +343,26 @@ func bake(crawl *CrawlSettings, w http.ResponseWriter, r *http.Request) (err err
 		http.SetCookie(w, &c)
 	} else {
 		c1, _ := r.Cookie("keywordHistory")
-		v := fmt.Sprintf("%s%s%s", c1.Value, " : ", crawl.Keyword)
+		v := fmt.Sprintf("%s%s%s", c1.Value, sep, crawl.Keyword)
+		_ = trimDuplicates(&v, sep)
 		c2 := http.Cookie{Name: "keywordHistory", Value: v, Path: "/"}
 		http.SetCookie(w, &c2)
 	}
+	return nil
+}
+
+// Remove duplicate values in cookie value string. 
+func trimDuplicates(s *string, sep string) (err error) {
+	vals := strings.Split(*s, sep)
+	for i, v1 := range vals {
+		for j, v2 := range vals[i+1:] {
+			if v1 == v2 {
+				// Delete dupliate value v2.
+				vals = append(vals[:j], vals[j+1:]...)
+			}
+		}
+	}
+	*s = strings.Join(vals, sep)
 	return nil
 }
 
