@@ -357,7 +357,7 @@ func trimDuplicates(s *string, sep string) (err error) {
 	for i, v1 := range vals {
 		for j, v2 := range vals[i+1:] {
 			if v1 == v2 {
-				// Delete dupliate value v2.
+				// Delete duplicate value v2.
 				vals = append(vals[:j], vals[j+1:]...)
 			}
 		}
