@@ -2,8 +2,6 @@
 // App Engine to host the crawler app.
 // It gets the crawl settings by form,
 // crawls, and graphs the crawl with D3.js.
-// TODO build keywordHighlight feature
-// TODO add past starting urls using cookies/sessions
 package main
 
 import (
@@ -15,7 +13,9 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"google.golang.org/appengine"
@@ -50,6 +50,7 @@ type Edge struct {
 type Page struct {
 	links   []string
 	visited bool
+	hasKey  bool
 }
 
 // Shuffle function borrowed from
@@ -102,7 +103,7 @@ func (q *queue) length() int {
 	return len(*q)
 }
 
-func BreadthFirst(startingUrl string, r *http.Request, limit int) map[string]Page {
+func BreadthFirst(startingUrl string, r *http.Request, limit int, keyWord string) map[string]Page {
 	// pages will hold all the info we need to pass to the graph
 	pages := make(map[string]Page)
 
@@ -134,7 +135,7 @@ func BreadthFirst(startingUrl string, r *http.Request, limit int) map[string]Pag
 		}
 
 		// visit the first url and find all the urls it links to
-		links, err := retrieveBody(top, r)
+		links, foundKey, err := retrieveBody(top, r, keyWord)
 		if err != nil {
 			log.Printf("couldnt retrieve body: %v", err)
 			if levelSize == 0 {
@@ -145,7 +146,11 @@ func BreadthFirst(startingUrl string, r *http.Request, limit int) map[string]Pag
 		}
 
 		// mark the current link as visited.
-		pages[top] = Page{links: links, visited: true}
+		if foundKey {
+			pages[top] = Page{links: links, visited: true, hasKey: true}
+		} else {
+			pages[top] = Page{links: links, visited: true, hasKey: false}
+		}
 
 		// add the new links to the queue
 		// this way, the next link we pop will be a sibling
@@ -159,6 +164,10 @@ func BreadthFirst(startingUrl string, r *http.Request, limit int) map[string]Pag
 			allLinks.push(link)
 		}
 
+		if foundKey {
+			break
+		}
+
 		if levelSize == 0 {
 			levelSize = allLinks.length()
 			depthCount++
@@ -168,7 +177,7 @@ func BreadthFirst(startingUrl string, r *http.Request, limit int) map[string]Pag
 	return pages
 }
 
-func DepthFirst(startingUrl string, r *http.Request, limit int) map[string]Page {
+func DepthFirst(startingUrl string, r *http.Request, limit int, keyWord string) map[string]Page {
 	// pages will hold all the urls we'll format for the graph
 	pages := make(map[string]Page)
 
@@ -194,7 +203,7 @@ func DepthFirst(startingUrl string, r *http.Request, limit int) map[string]Page 
 		}
 
 		// visit the url at the top and get all the urls it links to
-		links, err := retrieveBody(top, r)
+		links, foundKey, err := retrieveBody(top, r, keyWord)
 		if err != nil {
 			log.Printf("couldnt retrieve body: %v", err)
 			continue
@@ -204,7 +213,11 @@ func DepthFirst(startingUrl string, r *http.Request, limit int) map[string]Page 
 		Shuffle(links)
 
 		// mark the current link as visited.
-		pages[top] = Page{links: links, visited: true}
+		if foundKey {
+			pages[top] = Page{links: links, visited: true, hasKey: true}
+		} else {
+			pages[top] = Page{links: links, visited: true, hasKey: false}
+		}
 		visitCount++
 
 		// push the new links to the stack
@@ -217,12 +230,15 @@ func DepthFirst(startingUrl string, r *http.Request, limit int) map[string]Page 
 			pages[link] = Page{visited: false}
 			allLinks.push(link)
 		}
+		if foundKey {
+			break
+		}
 	}
 
 	return pages
 }
 
-func Crawl(startingUrl string, r *http.Request, crawlType string, BL string, DL string) (
+func Crawl(startingUrl string, r *http.Request, crawlType string, BL string, DL string, keyWord string) (
 	[]Vertex, []Edge, error) {
 
 	pages := make(map[string]Page)
@@ -232,14 +248,14 @@ func Crawl(startingUrl string, r *http.Request, crawlType string, BL string, DL 
 			fmt.Errorf("could not parse limit: %s", BL)
 			return nil, nil, err
 		}
-		pages = BreadthFirst(startingUrl, r, breadthLimit)
+		pages = BreadthFirst(startingUrl, r, breadthLimit, keyWord)
 	} else if crawlType == "D" {
 		depthLimit, err := strconv.Atoi(DL)
 		if err != nil {
 			fmt.Errorf("could not parse limit: %s", BL)
 			return nil, nil, err
 		}
-		pages = DepthFirst(startingUrl, r, depthLimit)
+		pages = DepthFirst(startingUrl, r, depthLimit, keyWord)
 	} else {
 		return nil, nil, fmt.Errorf("incorrect crawl type parameter: %s", crawlType)
 	}
@@ -253,7 +269,11 @@ func Crawl(startingUrl string, r *http.Request, crawlType string, BL string, DL 
 		// create vertex and add to graph
 		v := new(Vertex)
 		v.Url = pageUrl
-		v.KeywordHighlight = false
+		if pages[pageUrl].hasKey {
+			v.KeywordHighlight = true
+		} else {
+			v.KeywordHighlight = false
+		}
 
 		Vertices = append(Vertices, *v)
 		idMap[pageUrl] = i
@@ -273,19 +293,19 @@ func Crawl(startingUrl string, r *http.Request, crawlType string, BL string, DL 
 }
 
 // retrieveBody gets the html body at a url and return a slice of links in that body
-func retrieveBody(pageUrl string, r *http.Request) ([]string, error) {
+func retrieveBody(pageUrl string, r *http.Request, keyWord string) ([]string, bool, error) {
 	// Set up App Engine client, https://cloud.google.com/appengine/docs/go/urlfetch/
 	ctx := appengine.NewContext(r)
 	client := urlfetch.Client(ctx)
 
 	resp, err := client.Get(pageUrl)
 	if err != nil {
-		return nil, fmt.Errorf("http transport error is: %v", err)
+		return nil, false, fmt.Errorf("http transport error is: %v", err)
 	}
 
 	urlb, err := url.Parse(pageUrl)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	// .Get() opened a TCP connection to the url .Close() will close it
 	// defer makes it so this function is not called until the function ends
@@ -300,10 +320,19 @@ func retrieveBody(pageUrl string, r *http.Request) ([]string, error) {
 	// parse html body for urls
 	doc, err := html.Parse(body)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
-	var f func(*html.Node)
-	f = func(n *html.Node) {
+
+	var pattern *regexp.Regexp
+	if keyWord != "" {
+		pattern, err = regexp.Compile("(?i)\\b" + keyWord + "\\b")
+		if err != nil {
+			return nil, false, err
+		}
+	}
+
+	var f func(*html.Node) bool
+	f = func(n *html.Node) bool {
 		if n.Type == html.ElementNode && n.Data == "a" {
 			for _, a := range n.Attr {
 				if a.Key == "href" {
@@ -316,13 +345,31 @@ func retrieveBody(pageUrl string, r *http.Request) ([]string, error) {
 				}
 			}
 		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			f(c)
+		if keyWord != "" {
+			if n.Type == html.TextNode {
+				if strings.TrimSpace(n.Data) != "" {
+					log.Printf("%q", n.Data)
+					if pattern.MatchString(n.Data) {
+						return true
+					}
+				}
+			}
+			if n.Type == html.ElementNode && (n.Data == "script" || n.Data == "style" || n.Data == "noscript") {
+				return false
+			}
 		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			if f(c) {
+				return true
+			}
+		}
+		return false
 	}
-	f(doc)
+	if f(doc) {
+		return foundUrl, true, nil
+	}
 
-	return foundUrl, err
+	return foundUrl, false, nil
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -350,7 +397,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &cookie)
 
 	// Populate crawl graph.
-	crawl_nodes, crawl_links, _ := Crawl(crawl.Url, r, crawl.Type, crawl.BL, crawl.DL)
+	crawl_nodes, crawl_links, _ := Crawl(crawl.Url, r, crawl.Type, crawl.BL, crawl.DL, crawl.Keyword)
+	if crawl_links == nil {
+		crawl_links = []Edge{}
+	}
 	// fmt.Println("vertices:\n", (crawl_nodes), "\nedges:\n", (crawl_links))
 	json := Graph{Nodes: crawl_nodes, Links: crawl_links, Success: true, CrawlUrl: crawl.Url}
 	// Render graph.
