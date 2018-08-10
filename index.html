@@ -168,10 +168,10 @@
         obj.id = idx;
         return obj;
       })
-      var links = ({{.Links }}).map(obj => _.mapKeys(obj, (value, key) => {
-        return key.toLowerCase();
-      }))
-      //DEBUG: console.log(nodes);
+      var links = {{.Links}};
+
+      //DEBUG: 
+      // console.log(nodes);
 
       // Zoom variable for D3
       var zoom = d3.zoom()
