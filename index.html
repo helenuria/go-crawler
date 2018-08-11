@@ -341,17 +341,13 @@
           <label for="Url">Url</label>
           <input class="form-control" list="url-history" type="url" name="Url" id="Url" placeholder="https://www.example.com" required>
           <!-- Cookies populated list -->
-          <datalist id="url-history">
-	          <option id="url-cookie">
-          </datalist>
+          <datalist id="url-history"></datalist>
         </div>
         <div class="form-group col-md-2 offset-2">
           <label for="Keyword">Keyword</label>
           <input class="form-control" list="keyword-history" type="text" name="Keyword" id="Keyword" placeholder="optional">
           <!-- Cookies populated list -->
-          <datalist id="keyword-history">
-            <option id="keyword-cookie">
-          </datalist>
+          <datalist id="keyword-history"></datalist>
         </div>
       </div>
       <!-- Crawl method -->
@@ -400,14 +396,20 @@
 
     <!-- Cookies -->
     <script>
-      // No need to check if undefined because dropdown only populates urls.
-      document.getElementById("url-cookie").value = Cookies.get('urlHistory');
-      console.log(Cookies.get('urlHistory'));
-      // Don't populate dropdown with 'undefined' text.
-      if (typeof Cookies.get('keywordHistory') !== 'undefined') {  
-	      document.getElementById("keyword-cookie").value = Cookies.get('keywordHistory');
-        console.log(Cookies.get('keywordHistory'));
-      }
+	var urls = (Cookies.get('urlHistory')).split(" : ");
+	var urlList = document.getElementById('url-history');
+	urls.forEach(function(url){
+		var option = document.createElement('option');
+		option.value = url;
+		urlList.appendChild(option);
+	});
+	var keywords = Cookies.get('keywordHistory').split(" : ");
+	var keywordList = document.getElementById('keyword-history');
+	keywords.forEach(function(keyword){
+		var option = document.createElement('option');
+		option.value = keyword;
+		keywordList.appendChild(option);
+	});
       function clearCookies() {
 	      Cookies.remove('urlHistory');
 	      Cookies.remove('keywordHistory');
