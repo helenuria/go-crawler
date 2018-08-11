@@ -162,17 +162,18 @@
     <br>
     <br>
     <script>
-      // These two maps are inefficient. Will need to refactored to the backend to be in the correct format.
+      // These two functions modify the JSON's keys to be in the correct format
+      // for the renderer.
       var nodes = ({{.Nodes }}).map((obj, idx) => {
         obj.id = idx;
         return obj;
       })
-      // can be refactored on the backend by specifying `json:"target"` and `json:"source"`
-      var links = ({{.Links }}).map(obj => _.mapKeys(obj, (value, key) => {
-        return key.toLowerCase();
-      }))
-      console.log(nodes);
+      var links = {{.Links}};
 
+      //DEBUG: 
+      // console.log(nodes);
+
+      // Zoom variable for D3
       var zoom = d3.zoom()
         .scaleExtent([1 / 10, 2])
         .on("zoom", zoomed);
@@ -180,6 +181,7 @@
       const width = window.innerWidth * .95;
       const height = window.innerHeight * .75;
       const mid = width / 2;
+      // Select SVG and add zoom, width, and height attributes
       const svg = d3.select('svg')
         .attr('width', width)
         .attr('height', height)
@@ -214,7 +216,7 @@
         node.fy = null
       })
 
-      // used to open URL
+      // Clicking on node opens URL
       function openTab(selectedNode) {
         window.open(
           selectedNode.Url,
@@ -222,13 +224,13 @@
         );
       }
 
-      // For d3 zooming
+      // Zoom function
       function zoomed() {
         linkElements.attr("transform", d3.event.transform);
         nodeElements.attr("transform", d3.event.transform);
       }
 
-      // Position labels according to their position in the SVG
+      // Position labels relative to the center of the SVG
       function repositionLabel(data) {
         var urlLength = data.Url.length;
         var nameOffset = (urlLength * 27.5);
@@ -251,12 +253,13 @@
       var nodeElements = svg.selectAll("foo")
         .data(nodes)
         .enter().append("g")
-
+      
+      // The actual nodes
       var circles = nodeElements.append("circle")
         .attr("r", 15)
         .call(dragDrop)
         .on('click', openTab) // open tab by clicking on vertices
-        .attr('fill', (data) => {
+        .attr('fill', (data) => { // keyword highlighting
           if (data.KeywordHighlight)
             return '#fff960';
           else
@@ -271,8 +274,9 @@
         .attr("font-size", 60)
         .attr("font-family", "sans-serif")
 
-
-      simulation.nodes(nodes).on('tick', () => {
+      // The graph's simulation
+      simulation.nodes(nodes)
+        .on('tick', () => {
         circles
           .attr('cx', node => node.x)
           .attr('cy', node => node.y)
@@ -285,7 +289,10 @@
           .attr('x2', link => link.target.x)
           .attr('y2', link => link.target.y)
       })
-      simulation.force("link").links(links);
+      simulation.force("link").links(links)
+
+
+
 
     </script>
 
@@ -314,7 +321,7 @@
       }
       .crawlForm:hover,
       #clear-cookies:hover {
-        box-shadow: 0px 0px 10px #553de0;
+        box-shadow: 0px 0px 15px #553de0;
       }
       select:hover,
       input:hover:not(.form-check-input) {
@@ -367,7 +374,7 @@
             <input type="radio" name="Type" value="B" id="bfs" class="form-check-input">
             <label class="form-check-label" for="bfs">Breadth-first</label>
             <div class="sub">
-              <div class="col-md-4 offset-6">
+              <div class="col-md-6 offset-6">
                 <label>Depth Limit:</label>
                 <select id="depthBFS" class="form-control" name="BL">
                   <option value="1">1</option>
@@ -382,7 +389,7 @@
             <input type="radio" name="Type" value="D" id="dfs" class="form-check-input">
             <label class="form-check-label" for="dfs">Depth-first</label>
             <div class="sub">
-              <div class="col-md-4 offset-6">
+              <div class="col-md-6 offset-6">
                 <label>Depth Limit:</label>
                 <input class="form-control" type="number" name="DL" min="1" max="50">
               </div>

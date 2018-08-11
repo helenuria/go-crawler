@@ -7,7 +7,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"golang.org/x/net/html"
 	"html/template"
 	"log"
 	"math/rand"
@@ -17,6 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/net/html"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/urlfetch"
@@ -43,8 +44,8 @@ type Vertex struct {
 }
 
 type Edge struct {
-	Target int
-	Source int
+	Target int `json:"target"`
+	Source int `json:"source"`
 }
 
 type Page struct {
@@ -397,12 +398,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &cookie)
 
 	// Populate crawl graph.
-	crawl_nodes, crawl_links, _ := Crawl(crawl.Url, r, crawl.Type, crawl.BL, crawl.DL, crawl.Keyword)
-	if crawl_links == nil {
-		crawl_links = []Edge{}
+	crawlNodes, crawlLinks, _ := Crawl(crawl.Url, r, crawl.Type, crawl.BL, crawl.DL, crawl.Keyword)
+	if crawlLinks == nil {
+		crawlLinks = []Edge{}
 	}
-	// fmt.Println("vertices:\n", (crawl_nodes), "\nedges:\n", (crawl_links))
-	json := Graph{Nodes: crawl_nodes, Links: crawl_links, Success: true, CrawlUrl: crawl.Url}
+	// fmt.Println("vertices:\n", (crawlNodes), "\nedges:\n", (crawLinks))
+	json := Graph{Nodes: crawlNodes, Links: crawlLinks, Success: true, CrawlUrl: crawl.Url}
 	// Render graph.
 	tmpl.Execute(w, json)
 }
