@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"html/template"
@@ -41,6 +42,7 @@ type Graph struct {
 type Vertex struct {
 	Url              string
 	KeywordHighlight bool
+	Title            string
 }
 
 type Edge struct {
@@ -52,6 +54,7 @@ type Page struct {
 	links   []string
 	visited bool
 	hasKey  bool
+	title   string
 }
 
 // Shuffle function borrowed from
@@ -136,7 +139,7 @@ func BreadthFirst(startingUrl string, r *http.Request, limit int, keyWord string
 		}
 
 		// visit the first url and find all the urls it links to
-		links, foundKey, err := retrieveBody(top, r, keyWord)
+		title, links, foundKey, err := retrieveBody(top, r, keyWord)
 		if err != nil {
 			log.Printf("couldnt retrieve body: %v", err)
 			if levelSize == 0 {
@@ -148,9 +151,9 @@ func BreadthFirst(startingUrl string, r *http.Request, limit int, keyWord string
 
 		// mark the current link as visited.
 		if foundKey {
-			pages[top] = Page{links: links, visited: true, hasKey: true}
+			pages[top] = Page{links: links, visited: true, hasKey: true, title: title}
 		} else {
-			pages[top] = Page{links: links, visited: true, hasKey: false}
+			pages[top] = Page{links: links, visited: true, hasKey: false, title: title}
 		}
 
 		// add the new links to the queue
@@ -204,7 +207,7 @@ func DepthFirst(startingUrl string, r *http.Request, limit int, keyWord string) 
 		}
 
 		// visit the url at the top and get all the urls it links to
-		links, foundKey, err := retrieveBody(top, r, keyWord)
+		pageTitle, links, foundKey, err := retrieveBody(top, r, keyWord)
 		if err != nil {
 			log.Printf("couldnt retrieve body: %v", err)
 			continue
@@ -215,9 +218,9 @@ func DepthFirst(startingUrl string, r *http.Request, limit int, keyWord string) 
 
 		// mark the current link as visited.
 		if foundKey {
-			pages[top] = Page{links: links, visited: true, hasKey: true}
+			pages[top] = Page{links: links, visited: true, hasKey: true, title: pageTitle}
 		} else {
-			pages[top] = Page{links: links, visited: true, hasKey: false}
+			pages[top] = Page{links: links, visited: true, hasKey: false, title: pageTitle}
 		}
 		visitCount++
 
@@ -275,6 +278,8 @@ func Crawl(startingUrl string, r *http.Request, crawlType string, BL string, DL 
 		} else {
 			v.KeywordHighlight = false
 		}
+		pageTitle := pages[pageUrl].title
+		v.Title = pageTitle
 
 		Vertices = append(Vertices, *v)
 		idMap[pageUrl] = i
@@ -294,19 +299,19 @@ func Crawl(startingUrl string, r *http.Request, crawlType string, BL string, DL 
 }
 
 // retrieveBody gets the html body at a url and return a slice of links in that body
-func retrieveBody(pageUrl string, r *http.Request, keyWord string) ([]string, bool, error) {
+func retrieveBody(pageUrl string, r *http.Request, keyWord string) (string, []string, bool, error) {
 	// Set up App Engine client, https://cloud.google.com/appengine/docs/go/urlfetch/
 	ctx := appengine.NewContext(r)
 	client := urlfetch.Client(ctx)
 
 	resp, err := client.Get(pageUrl)
 	if err != nil {
-		return nil, false, fmt.Errorf("http transport error is: %v", err)
+		return "", nil, false, fmt.Errorf("http transport error is: %v", err)
 	}
 
 	urlb, err := url.Parse(pageUrl)
 	if err != nil {
-		return nil, false, err
+		return "", nil, false, err
 	}
 	// .Get() opened a TCP connection to the url .Close() will close it
 	// defer makes it so this function is not called until the function ends
@@ -321,19 +326,24 @@ func retrieveBody(pageUrl string, r *http.Request, keyWord string) ([]string, bo
 	// parse html body for urls
 	doc, err := html.Parse(body)
 	if err != nil {
-		return nil, false, err
+		return "", nil, false, err
 	}
 
 	var pattern *regexp.Regexp
 	if keyWord != "" {
 		pattern, err = regexp.Compile("(?i)\\b" + keyWord + "\\b")
 		if err != nil {
-			return nil, false, err
+			return "", nil, false, err
 		}
 	}
 
+	var titleText string
+
 	var f func(*html.Node) bool
 	f = func(n *html.Node) bool {
+		if n.Type == html.ElementNode && n.Data == "title" {
+			titleText = getText(n)
+		}
 		if n.Type == html.ElementNode && n.Data == "a" {
 			for _, a := range n.Attr {
 				if a.Key == "href" {
@@ -349,7 +359,6 @@ func retrieveBody(pageUrl string, r *http.Request, keyWord string) ([]string, bo
 		if keyWord != "" {
 			if n.Type == html.TextNode {
 				if strings.TrimSpace(n.Data) != "" {
-					log.Printf("%q", n.Data)
 					if pattern.MatchString(n.Data) {
 						return true
 					}
@@ -367,10 +376,27 @@ func retrieveBody(pageUrl string, r *http.Request, keyWord string) ([]string, bo
 		return false
 	}
 	if f(doc) {
-		return foundUrl, true, nil
+		return titleText, foundUrl, true, nil
 	}
 
-	return foundUrl, false, nil
+	return titleText, foundUrl, false, nil
+}
+
+func getText(body *html.Node) string {
+	var foundString bytes.Buffer
+	var f func(*html.Node)
+	f = func(n *html.Node) {
+		if n.Type == html.TextNode {
+			if strings.TrimSpace(n.Data) != "" {
+				foundString.WriteString(n.Data)
+			}
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			f(c)
+		}
+	}
+	f(body)
+	return foundString.String()
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
