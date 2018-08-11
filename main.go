@@ -352,17 +352,20 @@ func bake(crawl *CrawlSettings, w http.ResponseWriter, r *http.Request) (err err
 }
 
 // Remove duplicate values in cookie value string. 
+// https://www.dotnetperls.com/duplicates-go
 func trimDuplicates(s *string, sep string) (err error) {
 	vals := strings.Split(*s, sep)
-	for i, v1 := range vals {
-		for j, v2 := range vals[i+1:] {
-			if v1 == v2 {
-				// Delete duplicate value v2.
-				vals = append(vals[:j], vals[j+1:]...)
-			}
+	encountered := make(map[string]bool)
+	result := []string{}
+	for i := range vals {
+		if encountered[vals[i]] == true {
+			// Don't add duplicate.
+		} else {
+			encountered[vals[i]] = true
+			result = append(result, vals[i])
 		}
 	}
-	*s = strings.Join(vals, sep)
+	*s = strings.Join(result, sep)
 	return nil
 }
 
