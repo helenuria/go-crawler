@@ -338,7 +338,10 @@ func bake(crawl *CrawlSettings, w http.ResponseWriter, r *http.Request) (err err
 		c2 := http.Cookie{Name: "urlHistory", Value: v, Path: "/"}
 		http.SetCookie(w, &c2)
 	}
-	if _, err := r.Cookie("keywordHistory"); err != nil {
+	if crawl.Keyword == "" {
+		// Keyword not entered.
+		return nil
+	} else if _, err := r.Cookie("keywordHistory"); err != nil {
 		c := http.Cookie{Name: "keywordHistory", Value: crawl.Keyword, Path: "/"}
 		http.SetCookie(w, &c)
 	} else {
