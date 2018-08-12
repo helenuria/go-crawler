@@ -43,6 +43,7 @@ type Vertex struct {
 	Url              string
 	KeywordHighlight bool
 	Title            string
+	Visited          bool
 }
 
 type Edge struct {
@@ -280,6 +281,7 @@ func Crawl(startingUrl string, r *http.Request, crawlType string, BL string, DL 
 		}
 		pageTitle := pages[pageUrl].title
 		v.Title = pageTitle
+		v.Visited = pages[pageUrl].visited
 
 		Vertices = append(Vertices, *v)
 		idMap[pageUrl] = i
