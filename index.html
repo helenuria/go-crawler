@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>D3 Demo</title>
+  <title>Go Crawler</title>
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
@@ -162,12 +162,20 @@
     <br>
     <br>
     <script>
-      // These two functions modify the JSON's keys to be in the correct format
+      // this function modifies the JSON's keys to be in the correct format
       // for the renderer.
       var nodes = ({{.Nodes }}).map((obj, idx) => {
         obj.id = idx;
         return obj;
+      }).map((obj) => {
+        if (obj.Title) {
+          obj.radius = 80;
+        } else {
+          obj.radius = 20;
+        }
+        return obj;
       })
+      
       var links = {{.Links}};
 
       //DEBUG: 
@@ -290,7 +298,7 @@
       // The graph's simulation
       simulation.nodes(nodes)
         .force('collision', d3.forceCollide().radius(d => {
-          return d.r + 0.5;
+          return d.radius + 0.5;
         }))
         .on('tick', () => {
         circles
