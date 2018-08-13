@@ -16,6 +16,8 @@ Visit the application webpage [https://crater-211104.appspot.com][app] and fill 
 The URL needs to begin with `https://`.
 The keyword is optional and is searched for. If found, the crawl stops and highlights the page's URL node.
 Be sure to pick a Crawl Method and Depth Limit or else the crawl graph will be empty!
+The Breadth-first limit is limited to 1 or 2 because higher values are likely to crash the server. 
+The Depth-first limit is not limited but be aware that higher values may crash the server.
 Click Submit to show the crawl graph.
 ![Homepage with form filled](img/home-form-filled.PNG)
 
