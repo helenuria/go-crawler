@@ -175,7 +175,7 @@
 
       // Zoom variable for D3
       var zoom = d3.zoom()
-        .scaleExtent([1 / 10, 2])
+        .scaleExtent([1 / 25, 2])
         .on("zoom", zoomed);
       // set SVG element to size of height and width
       const width = window.innerWidth * .95;
@@ -190,15 +190,15 @@
       var linkForce = d3
         .forceLink()
         .id(link => link.id)
-        .strength((link) => .4)
-        .distance(d => 100)
+        .distance(d => 200)
 
       // node simulation
       var simulation = d3
         .forceSimulation()
         .force('link', linkForce)
-        .force('charge', d3.forceManyBody().strength(-500))
+        .force('charge', d3.forceManyBody().strength(-800))
         .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide().radius(20))
 
       // drag and drop to play with graph
       var dragDrop = d3.drag().on('start', (node) => {
@@ -256,7 +256,13 @@
       
       // The actual nodes
       var circles = nodeElements.append("circle")
-        .attr("r", 15)
+        .attr("r", (data) => {
+          if (data.Title) {
+            return 80;
+          } else {
+            return 20;
+          }
+        })
         .call(dragDrop)
         .on('click', openTab) // open tab by clicking on vertices
         .attr('fill', (data) => { // keyword highlighting
@@ -273,7 +279,14 @@
         .text(node => node.Url)
         .attr("font-size", 60)
         .attr("font-family", "sans-serif")
-
+      
+      // titles
+      var titles = nodeElements.append("text")
+        .text(node => node.Title)
+        .attr("text-anchor", "middle")
+        .attr("font-size", 30)
+        .attr("font-family", "sans-serif")
+        
       // The graph's simulation
       simulation.nodes(nodes)
         .on('tick', () => {
@@ -281,13 +294,16 @@
           .attr('cx', node => node.x)
           .attr('cy', node => node.y)
         textElements
-          .attr('y', node => node.y - 45)
+          .attr('y', node => node.y - 80)
           .attr("x", node => node.x + repositionLabel(node))
         linkElements
           .attr('x1', link => link.source.x)
           .attr('y1', link => link.source.y)
           .attr('x2', link => link.target.x)
           .attr('y2', link => link.target.y)
+        titles
+          .attr('x', node => node.x)
+          .attr('y', node => node.y)
       })
       simulation.force("link").links(links)
 
