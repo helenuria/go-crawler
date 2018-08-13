@@ -198,7 +198,7 @@
         .force('link', linkForce)
         .force('charge', d3.forceManyBody().strength(-800))
         .force('center', d3.forceCenter(width / 2, height / 2))
-        .force('collision', d3.forceCollide().radius(20))
+
 
       // drag and drop to play with graph
       var dragDrop = d3.drag().on('start', (node) => {
@@ -289,6 +289,9 @@
         
       // The graph's simulation
       simulation.nodes(nodes)
+        .force('collision', d3.forceCollide().radius(d => {
+          return d.r + 0.5;
+        }))
         .on('tick', () => {
         circles
           .attr('cx', node => node.x)
