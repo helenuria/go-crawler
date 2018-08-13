@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>D3 Demo</title>
+  <title>Go Crawler</title>
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
@@ -170,7 +170,7 @@
       })
       var links = {{.Links}};
 
-      //DEBUG: 
+      //DEBUG:
       // console.log(nodes);
 
       // Zoom variable for D3
@@ -253,7 +253,7 @@
       var nodeElements = svg.selectAll("foo")
         .data(nodes)
         .enter().append("g")
-      
+
       // The actual nodes
       var circles = nodeElements.append("circle")
         .attr("r", (data) => {
@@ -279,14 +279,14 @@
         .text(node => node.Url)
         .attr("font-size", 60)
         .attr("font-family", "sans-serif")
-      
+
       // titles
       var titles = nodeElements.append("text")
         .text(node => node.Title)
         .attr("text-anchor", "middle")
         .attr("font-size", 30)
         .attr("font-family", "sans-serif")
-        
+
       // The graph's simulation
       simulation.nodes(nodes)
         .force('collision', d3.forceCollide().radius(d => {
@@ -457,7 +457,7 @@
       </div>
     </footer>
   </div>
-  
+
 
 
 
