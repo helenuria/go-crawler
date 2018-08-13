@@ -43,6 +43,7 @@ type Vertex struct {
 	Url              string
 	KeywordHighlight bool
 	Title            string
+	Visited          bool
 }
 
 type Edge struct {
@@ -280,6 +281,7 @@ func Crawl(startingUrl string, r *http.Request, crawlType string, BL string, DL 
 		}
 		pageTitle := pages[pageUrl].title
 		v.Title = pageTitle
+		v.Visited = pages[pageUrl].visited
 
 		Vertices = append(Vertices, *v)
 		idMap[pageUrl] = i
@@ -399,6 +401,54 @@ func getText(body *html.Node) string {
 	return foundString.String()
 }
 
+// Save url and keyword history with cookies. 
+func bake(crawl *CrawlSettings, w http.ResponseWriter, r *http.Request) (err error) {
+	var sep string = " : "
+	if _, err := r.Cookie("urlHistory"); err != nil {
+		c := http.Cookie{Name: "urlHistory", Value: crawl.Url, Path: "/"}
+		http.SetCookie(w, &c)
+	} else {
+		c1, _ := r.Cookie("urlHistory")
+		v := fmt.Sprintf("%s%s%s", c1.Value, sep, crawl.Url)
+		_ = trimDuplicates(&v, sep)
+		c2 := http.Cookie{Name: "urlHistory", Value: v, Path: "/"}
+		http.SetCookie(w, &c2)
+	}
+	if crawl.Keyword == "" {
+		// Keyword not entered.
+		return nil
+	} else if _, err := r.Cookie("keywordHistory"); err != nil {
+		c := http.Cookie{Name: "keywordHistory", Value: crawl.Keyword, Path: "/"}
+		http.SetCookie(w, &c)
+	} else {
+		c1, _ := r.Cookie("keywordHistory")
+		v := fmt.Sprintf("%s%s%s", c1.Value, sep, crawl.Keyword)
+		_ = trimDuplicates(&v, sep)
+		c2 := http.Cookie{Name: "keywordHistory", Value: v, Path: "/"}
+		http.SetCookie(w, &c2)
+	}
+	return nil
+}
+
+// Remove duplicate values in cookie value string. 
+// https://www.dotnetperls.com/duplicates-go
+func trimDuplicates(s *string, sep string) (err error) {
+	vals := strings.Split(*s, sep)
+	encountered := make(map[string]bool)
+	result := []string{}
+	for i := range vals {
+		if encountered[vals[i]] == true {
+			// Don't add duplicate.
+		} else {
+			encountered[vals[i]] = true
+			result = append(result, vals[i])
+		}
+	}
+	*s = strings.Join(result, sep)
+	return nil
+}
+
+// Responds to an HTTP request.
 func handler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("index.html"))
 
@@ -414,14 +464,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		BL:      r.FormValue("BL"),
 		DL:      r.FormValue("DL"),
 	}
-	// Crawl settings is now populated.
-	//fmt.Printf("%+v\n", crawl) // debug
+	//fmt.Printf("%+v\n", crawl)
 
-	// Cookies.
-	cookie := http.Cookie{Name: "urlHistory", Value: crawl.Url, Path: "/"}
-	http.SetCookie(w, &cookie)
-	cookie = http.Cookie{Name: "keywordHistory", Value: crawl.Keyword, Path: "/"}
-	http.SetCookie(w, &cookie)
+	if err := bake(&crawl, w, r); err != nil {
+		fmt.Println(err)
+	}
 
 	// Populate crawl graph.
 	crawlNodes, crawlLinks, _ := Crawl(crawl.Url, r, crawl.Type, crawl.BL, crawl.DL, crawl.Keyword)
