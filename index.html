@@ -178,7 +178,7 @@
       
       var links = {{.Links}};
 
-      //DEBUG: 
+      //DEBUG:
       // console.log(nodes);
 
       // Zoom variable for D3
@@ -261,7 +261,7 @@
       var nodeElements = svg.selectAll("foo")
         .data(nodes)
         .enter().append("g")
-      
+
       // The actual nodes
       var circles = nodeElements.append("circle")
         .attr("r", (data) => {
@@ -287,14 +287,14 @@
         .text(node => node.Url)
         .attr("font-size", 60)
         .attr("font-family", "sans-serif")
-      
+
       // titles
       var titles = nodeElements.append("text")
         .text(node => node.Title)
         .attr("text-anchor", "middle")
         .attr("font-size", 30)
         .attr("font-family", "sans-serif")
-        
+
       // The graph's simulation
       simulation.nodes(nodes)
         .force('collision', d3.forceCollide().radius(d => {
@@ -465,7 +465,7 @@
       </div>
     </footer>
   </div>
-  
+
 
 
 
