@@ -10,7 +10,7 @@ It is hosted using the Google Cloud App Engine at [https://crater-211104.appspot
 * Dominic Phan
 
 ## Usage Instructions
-Visit the application webpage [https://crater-211104.appspot.com][app] and fill out the form.
+Visit the application webpage [https://crater-211104.appspot.com][app] and fill out the form or click About (top right).
 ![Homepage](img/home.PNG)
 
 The URL needs to begin with `https://`.
