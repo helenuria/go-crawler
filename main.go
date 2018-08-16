@@ -401,7 +401,7 @@ func getText(body *html.Node) string {
 	return foundString.String()
 }
 
-// Save url and keyword history with cookies. 
+// Save url and keyword history with cookies.
 func bake(crawl *CrawlSettings, w http.ResponseWriter, r *http.Request) (err error) {
 	var sep string = " : "
 	if _, err := r.Cookie("urlHistory"); err != nil {
@@ -430,7 +430,7 @@ func bake(crawl *CrawlSettings, w http.ResponseWriter, r *http.Request) (err err
 	return nil
 }
 
-// Remove duplicate values in cookie value string. 
+// Remove duplicate values in cookie value string.
 // https://www.dotnetperls.com/duplicates-go
 func trimDuplicates(s *string, sep string) (err error) {
 	vals := strings.Split(*s, sep)
