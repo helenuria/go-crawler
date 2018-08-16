@@ -1,4 +1,4 @@
-// main.go uses th Google Cloud
+// main.go uses the Google Cloud
 // App Engine to host the crawler app.
 // It gets the crawl settings by form,
 // crawls, and graphs the crawl with D3.js.
@@ -481,9 +481,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, json)
 }
 
+// Responds to an HTTP request for the about page.
+func handlerAbout(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("about.html"))
+	tmpl.Execute(w, nil)
+}
+
 func main() {
 	rand.Seed(time.Now().UTC().UnixNano())
 	flag.Parse()
 	http.HandleFunc("/", handler)
+	http.HandleFunc("/about", handlerAbout)
 	appengine.Main() // Starts the server to receive requests.
 }
