@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <title>Go Crawler</title>
+  <!-- JS -->
   <script src="https://d3js.org/d3.v5.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
-
+  <!-- bootstrap css -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
     crossorigin="anonymous">
   <style>
-    /* SVG styling */
+    /* D3 SVG styling */
     circle+text {
       display: none;
     }
@@ -51,11 +51,6 @@
       color: #fff;
     }
     /* Bootstrap template */
-    html,
-    body {
-      height: 100%;
-      background-color: #333;
-    }
 
     body {
       display: -ms-flexbox;
@@ -63,6 +58,8 @@
       color: #fff;
       text-shadow: 0 .05rem .1rem rgba(0, 0, 0, .5);
       box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
+      height: 100%;
+      background-color: #333;
     }
 
     .masthead {
@@ -123,6 +120,7 @@
     footer a:hover {
       text-shadow: 0px 0px 10px #3de06e;
     }
+
     /* Custom Submit Button */
     .submit {
       border: 2px solid #3de06e;
@@ -163,7 +161,7 @@
     <br>
     <script>
       // this function modifies the JSON's keys to be in the correct format
-      // for the renderer.
+      // for the renderer. Radius property used for node collision detection.
       var nodes = ({{.Nodes }}).map((obj, idx) => {
         obj.id = idx;
         return obj;
@@ -183,7 +181,7 @@
 
       // Zoom variable for D3
       var zoom = d3.zoom()
-        .scaleExtent([1 / 25, 2])
+        .scaleExtent([1 / 25, 2]) // Zoom boundaries
         .on("zoom", zoomed);
       // set SVG element to size of height and width
       const width = window.innerWidth * .95;
@@ -199,7 +197,6 @@
         .forceLink()
         .id(link => link.id)
         .distance(d => 200)
-
       // node simulation
       var simulation = d3
         .forceSimulation()
@@ -247,7 +244,7 @@
         return initialOffsetX + offset;
       }
 
-      // styling for edges
+      // Load up data for edges and style
       var linkElements = svg.append("g")
         .attr("class", "links")
         .selectAll("line")
@@ -255,14 +252,11 @@
         .enter().append("line")
         .attr("stroke-width", 1)
         .attr("stroke", "#3de06e")
-
-
-      // styling for vertices
+      // Load up data for nodes
       var nodeElements = svg.selectAll("foo")
         .data(nodes)
         .enter().append("g")
-
-      // The actual nodes
+      // Create circles to represent nodes
       var circles = nodeElements.append("circle")
         .attr("r", (data) => {
           if (data.Title) {
@@ -279,7 +273,6 @@
           else
             return '#553de0';
         })
-
       //styling for labels
       var textElements = nodeElements.append("text")
         .attr("dy", ".35em")
@@ -287,14 +280,12 @@
         .text(node => node.Url)
         .attr("font-size", 60)
         .attr("font-family", "sans-serif")
-
       // titles
       var titles = nodeElements.append("text")
         .text(node => node.Title)
         .attr("text-anchor", "middle")
         .attr("font-size", 30)
         .attr("font-family", "sans-serif")
-
       // The graph's simulation
       simulation.nodes(nodes)
         .force('collision', d3.forceCollide().radius(d => {
@@ -316,11 +307,8 @@
           .attr('x', node => node.x)
           .attr('y', node => node.y)
       })
+      // Connect nodes
       simulation.force("link").links(links)
-
-
-
-
     </script>
 
       {{else}}
@@ -475,7 +463,4 @@
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
     crossorigin="anonymous"></script>
 </body>
-
-
-
 </html>
